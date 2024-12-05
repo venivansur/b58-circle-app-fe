@@ -13,14 +13,13 @@ import {
   Field,
   FieldLabel,
   Input,
-  Image
+  Image,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { Avatar } from '@/components/ui/avatar';
 import BGProfileCover from '@/assets/img/cover.png';
 import { GalleryAdd } from '@/assets/index';
 import { useAuthStore } from '@/store/auth';
-
 
 export function MyProfile() {
   const { user } = useAuthStore(); // Asumsi data user tersedia
@@ -125,22 +124,21 @@ export function MyProfile() {
                   src={profilePicture}
                   border={'1px solid black'}
                 />
+                {/* Tombol untuk mengganti gambar dengan ikon Gallery Add */}
                 <Button
                   variant="outline"
                   onClick={() => inputFileRef.current?.click()}
-                  
                 >
-                  Add Gallery
+                  <Image src={GalleryAdd} w="24px" />
                 </Button>
+                {/* Input untuk memilih file, disembunyikan */}
                 <Input
                   type="file"
                   accept="image/*"
                   ref={inputFileRef}
                   hidden
-                  
                   onChange={handleFileChange}
                 />
-                 <Image src={GalleryAdd} w="24px" />
               </Box>
             </Field.Root>
             <Field.Root id="name" mb={4}>
