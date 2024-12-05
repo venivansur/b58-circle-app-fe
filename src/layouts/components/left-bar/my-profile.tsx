@@ -13,26 +13,39 @@ import {
   Field,
   FieldLabel,
   Input,
+  Image
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Avatar } from '@/components/ui/avatar';
-import { useAuthStore } from '@/store/auth';
 import BGProfileCover from '@/assets/img/cover.png';
+import { GalleryAdd } from '@/assets/index';
+import { useAuthStore } from '@/store/auth';
+
 
 export function MyProfile() {
-  const { user } = useAuthStore();
-
+  const { user } = useAuthStore(); // Asumsi data user tersedia
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [open, setIsOpen] = useState(false);
   const [name, setName] = useState(user.profile.fullName);
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.profile.bio);
+  const [profilePicture, setProfilePicture] = useState(user.profile.profilePicture);
 
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
 
   const handleSave = () => {
-    console.log('Profile updated:', { name, username, bio });
+    console.log('Profile updated:', { name, username, bio, profilePicture });
+    // Tambahkan logika untuk menyimpan perubahan ke server
     onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newProfilePicture = URL.createObjectURL(file);
+      setProfilePicture(newProfilePicture);
+    }
   };
 
   return (
@@ -58,7 +71,7 @@ export function MyProfile() {
                 bottom={'-10'}
                 left={'3'}
                 position={'absolute'}
-                src={user.profile.profilePicture}
+                src={profilePicture}
                 border={'1px solid black'}
               />
             </Box>
@@ -74,28 +87,14 @@ export function MyProfile() {
             </Box>
             <Box>
               <Text as="h1" color={'white'} fontWeight={'bold'} fontSize={'xl'}>
-                {user.profile.fullName}
+                {name}
               </Text>
               <Text as="h1" color={'brand.secondary.500'}>
-                @{user.username}
+                @{username}
               </Text>
               <Text as="h1" color={'white'}>
-                {user.profile.bio}
+                {bio}
               </Text>
-              <Box display={'flex'} gap="20px" mt="10px">
-                <Text as="h1" color={'white'}>
-                  <Text as="span" fontWeight={'bold'}>
-                    {user.following}
-                  </Text>
-                  Following
-                </Text>
-                <Text as="h1" color={'white'}>
-                  <Text as="span" fontWeight={'bold'}>
-                    {user.followers}
-                  </Text>
-                  Followers
-                </Text>
-              </Box>
             </Box>
           </Box>
         </CardBody>
@@ -103,10 +102,47 @@ export function MyProfile() {
 
       <Dialog.Root open={open} onOpenChange={onClose} placement={'center'}>
         <DialogTrigger />
-        <DialogContent maxWidth="500px">
+        <DialogContent
+          width="100%"
+          bg={'gray.800'}
+          borderRadius="md"
+          boxShadow="lg"
+          margin="auto"
+          color={'white'}
+          transform="translateY(-70%)"
+          position="absolute"
+          left="68%"
+        >
           <DialogHeader>Edit Profile</DialogHeader>
           <DialogCloseTrigger />
           <Box p={4}>
+            <Field.Root id="profileImage" mb={4}>
+              <FieldLabel>Profile Picture</FieldLabel>
+              <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} mb={3}>
+                <Avatar
+                  w={'100px'}
+                  h={'100px'}
+                  src={profilePicture}
+                  border={'1px solid black'}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => inputFileRef.current?.click()}
+                  
+                >
+                  Add Gallery
+                </Button>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  ref={inputFileRef}
+                  hidden
+                  
+                  onChange={handleFileChange}
+                />
+                 <Image src={GalleryAdd} w="24px" />
+              </Box>
+            </Field.Root>
             <Field.Root id="name" mb={4}>
               <FieldLabel>Name</FieldLabel>
               <Input
@@ -136,12 +172,7 @@ export function MyProfile() {
           </Box>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              colorScheme="gray"
-              mr={3}
-              onClick={onClose}
-            >
+            <Button variant="outline" colorScheme="gray" mr={3} onClick={onClose}>
               Cancel
             </Button>
             <Button colorScheme="green" onClick={handleSave}>

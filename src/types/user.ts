@@ -23,4 +23,5 @@ export interface User {
   postPicture: any
   replies: number;
   likes?: number;
+  comments:string;
   }
