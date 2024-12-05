@@ -1,0 +1,212 @@
+
+
+[
+  {
+    
+    "email": "sasuke@gmail.com",
+    "username": "Sasuke",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Sasuke Uciha",
+      "address": "Jln. Merdeka",
+      "profilePicture": "https://th.bing.com/th/id/OIP.qLddtpthck3Zp6sTRAGlVQHaK3?w=119&h=180&c=7&r=0&o=5&dpr=1.5&pid=1.7",
+      "bio": "Pecinta alam dan petualangan."
+    },
+    "followers": 150,
+    "following": 75,
+    "isFollowed": true,
+    "post": {
+    "id": 1,
+      "timeAgo": "4h",
+      "postText": "Kalian pernah ga sih bet on saving? Jadi by calculation sebenernya kita ga survive sampe tanggal tertentu...",
+      "postPicture": "",
+      "replies": 381,
+      "likes": 36
+    }
+  },
+  {
+    
+    "email": "dina@gmail.com",
+    "username": "Haruno ",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Haruno Sakura",
+      "address": "Jln. Harapan",
+      "profilePicture": "https://th.bing.com/th/id/OIP.OIDMKgMBUUX7LUXS42MJdQHaLo?w=115&h=180&c=7&r=0&o=5&dpr=1.5&pid=1.7",
+      "bio": "Penggemar musik dan seni."
+    },
+    "followers": 220,
+    "following": 80,
+    "isFollowed": false,
+    "post": {
+   "id": 2,
+      "timeAgo": "17",
+      "postText": "Pernah nggak dapet dream job terus lama-lama ngerasa lah kok tidak seperti yang diharapkan...",
+      "postPicture": "https://thumb.viva.id/intipseleb/663x372/2022/01/04/61d4437a89304-kata-kata-semangat.jpg",
+      "replies": 291,
+      "likes": 293
+    }
+  },
+  {
+   
+    "email": "eko@gmail.com",
+    "username": "Choiji",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Akimici Choiji",
+      "address": "Jln. Cinta",
+      "profilePicture": "https://th.bing.com/th/id/OIP.iPfUMDjD2RVMv95Jk1MOsgHaHa?rs=1&pid=ImgDetMain",
+      "bio": "Software engineer yang menyukai teknologi."
+    },
+    "followers": 180,
+    "following": 60,
+    "isFollowed": true,
+    "post": {
+      "id": 3,
+      "timeAgo": "10",
+      "postText": "Dibanding rekan-rekan media menginterview saya terkait isu yang lagi ramai, ada baiknya mending interview instansi...",
+      "postPicture": "",
+      "replies": 181,
+      "likes": 93
+    }
+  },
+  {
+   
+    "email": "fina@gmail.com",
+    "username": "Ino",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Yamanaka Ino",
+      "address": "Jln. Pahlawan",
+      "profilePicture": "https://th.bing.com/th/id/OIP.vjrnCGGXL1i197Q1cVtZgAHaFi?rs=1&pid=ImgDetMain",
+      "bio": "Suka menulis dan berbagi cerita."
+    },
+    "followers": 250,
+    "following": 90,
+    "isFollowed": true,
+    "post": {
+      "id": 4,
+      "timeAgo": "4h",
+      "postText": "Kalian pernah ga sih bet on saving? Jadi by calculation sebenernya kita ga survive sampe tanggal tertentu...",
+      "postPicture": "",
+      "replies": 381,
+      "likes": 36
+    }
+  },
+  {  
+   
+    "email": "nidji@gmail.com",
+    "username": "Nidji",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Hyuga Nidji",
+      "address": "Jln. Bahagia",
+      "profilePicture": "https://static1.cbrimages.com/wordpress/wp-content/uploads/2021/04/5-neji-hyuga-using-byakugan.jpg",
+      "bio": "Olahragawan dan motivator."
+    },
+    "followers": 300,
+    "following": 100,
+    "isFollowed": false,
+    "post": {
+      "id": 5,
+      "timeAgo": "4h",
+      "postText": "Kalian pernah ga sih bet on saving? Jadi by calculation sebenernya kita ga survive sampe tanggal tertentu...",
+      "postPicture": "",
+      "replies": 381,
+      "likes": 36
+    }
+  },
+  {
+   
+    "email": "naruto@gmail.com",
+    "username": "naruto",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Uzumaki Naruto",
+      "address": "Jln. Sejahtera",
+      "profilePicture": "https://th.bing.com/th/id/OIP._CekmDNPAueKP4asy78UUAHaFb?rs=1&pid=ImgDetMain",
+      "bio": "Pencinta hewan dan alam."
+    },
+    "followers": 200,
+    "following": 70,
+    "isFollowed": true,
+    "post": {
+      "id": 6,
+      "timeAgo": "2d",
+      "postText": "Ternyata jadi Hokage itu lebih berat daripada ekspektasi. Kalau ada yang mau gantian, siapa berani coba?",
+      "postPicture": "https://th.bing.com/th/id/OIP.vgOCq4T_1zUzt-7Pzo8TqAHaHj?w=885&h=903&rs=1&pid=ImgDetMain",
+      "replies": 520,
+      "likes": 876
+    }
+  },
+  {
+   
+    "email": "Vansurya.01@gmail.com",
+    "username": "surya",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Veni Vansurya",
+      "address": "Jln. Inspirasi",
+      "profilePicture": "https://th.bing.com/th/id/OIP.ix6IBPNnm67CooguupBxLQHaEo?rs=1&pid=ImgDetMain",
+      "bio": "Bismillah Semoga Jadi Programer Hebat."
+    },
+    "followers": 230,
+    "following": 85,
+    "isFollowed": false,
+    "post": {
+      "id": 7,
+      "timeAgo": "4h",
+      "postText": "Kalian pernah ga sih bet on saving? Jadi by calculation sebenernya kita ga survive sampe tanggal tertentu...",
+      "postPicture": "",
+      "replies": 381,
+      "likes": 36
+    }
+  },
+  {
+    
+    "email": "kakashi@gmail.com",
+    "username": "Kakashi",
+    "password": "12345678",
+    "profile": {
+
+      "fullName": "Hatake Kakashi",
+      "address": "Jln. Kerja Keras",
+      "profilePicture": "https://th.bing.com/th/id/R.4a69d0ae8ccf560d567454e19e78ea87?rik=MyfkVNN6em9LMA&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36300000%2fKakashi-image-kakashi-36320413-1848-2560.jpg&ehk=W%2bcdvh9lsYQfJof%2f6Z3SUu8oM9WyrCWc4QL6d2Ubqkg%3d&risl=&pid=ImgRaw&r=0",
+      "bio": "Pengusaha muda yang ambisius."
+    },
+    "followers": 350,
+    "following": 120,
+    "isFollowed": true,
+    "post": {
+     "id": 8,
+    "timeAgo": "4h",
+    "postText": "Kalian pernah ga sih bet on saving? Jadi by calculation sebenernya kita ga survive sampe tanggal tertentu...",
+    "postPicture": "",
+    "replies": 381,
+    "likes": 36
+  }
+},
+  {
+  
+    "email": "hinata@gmail.com",
+    "username": "Hinata",
+    "password": "12345678",
+    "profile": {
+      "fullName": "Hinata Hyuga",
+      "address": "Jln. Rindu",
+      "profilePicture": "https://th.bing.com/th/id/R.a5671070498d78806efaa57fd860804e?rik=g%2fbO0lTt7hOqGQ&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f41200000%2fHinata-hinata-hyuga-41220348-1024-1448.jpg&ehk=sWA3VDJzAywljJ8%2bTsNsZLbDfutyIBw6rig8Ascdlv4%3d&risl=&pid=ImgRaw&r=0",
+      "bio": "Suka memasak dan berbagi resep."
+    },
+    "followers": 160,
+    "following": 50,
+    "isFollowed": false,
+    "post": {
+      "id": 9,
+      "timeAgo": "1w",
+      "postText": "Jangan menyerah pada impianmu, bahkan jika itu terasa jauh. Setiap langkah kecil tetap berarti.",
+      "postPicture": "",
+      "replies": 154,
+      "likes": 489
+    }
+  }
+]
