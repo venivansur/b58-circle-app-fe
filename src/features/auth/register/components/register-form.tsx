@@ -1,6 +1,6 @@
 import { Logo } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
-import { Image, Box, Link as ChakraLink, Input, Text } from '@chakra-ui/react';
+import { Image, Box, Link as ChakraLink, Input, Text, HStack } from '@chakra-ui/react';
 
 import { useRegisterForm } from '../hooks/use-register-form';
 
@@ -19,11 +19,11 @@ export function RegisterForm() {
         <Text as={'h1'} fontSize={'2xl'} color="white" fontWeight={'bold'}>
           Register to Circle
         </Text>
-        <Input placeholder="Full Name" {...register('name')} color={'white'} />
+        <Input placeholder="Full Name" {...register('fullName')} color={'white'} />
 
-        {errors.name ? (
+        {errors.fullName ? (
           <Text as={'span'} color={'red'}>
-            {errors.name.message}
+            {errors.fullName.message}
           </Text>
         ) : null}
 
@@ -48,18 +48,16 @@ export function RegisterForm() {
           </Text>
         ) : null}
 
-<Input placeholder="Address" {...register("address")} color={"white"} />
 
-{errors.address ? (
-  <Text as={"span"} color={"red"}>
-    {errors.address.message}
-  </Text>
-) : null}
-
-        <Box display={'flex'} justifyContent={'flex-end'}>
-          <ChakraLink href={'/login'} color="white">
-            Already have account?
+        <Box>
+          <HStack>
+            <Text color={"white"}>
+              Already have account?
+            </Text>
+          <ChakraLink href={'/login'} color="green">
+            Login
           </ChakraLink>
+          </HStack>
         </Box>
         <GreenButton type="submit">Register</GreenButton>
       </Box>

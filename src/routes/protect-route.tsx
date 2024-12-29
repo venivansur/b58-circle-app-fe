@@ -1,26 +1,28 @@
-import { useEffect } from 'react';
-import { useAuthStore } from '@/store/auth';
-import { Navigate, Outlet } from 'react-router-dom';
-import { AppLayout } from '@/layouts/layout';
+import { AppLayout } from "@/layouts/layout";
+import { useGetMe } from "@/services/me";
 
-const ProtectedPage = () => {
-  const { user, clearUser } = useAuthStore();
+import { Outlet, Navigate } from "react-router-dom";
 
-  useEffect(() => {
-    if (!user || !user.username) {
-      clearUser();
-    }
-  }, [user, clearUser]);
+export function ProtectedRoute() {
+  const token = localStorage.getItem("token"); // Retrieve token from local storage
+  const { data, isError, isFetched } = useGetMe();
 
-  if (!user || !user.username) {
-    return <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to={"/login"} />; // If no token, redirect to login page
   }
 
-  return (
-    <AppLayout>
-      <Outlet />
-    </AppLayout>
-  );
-};
+  if (isFetched) {
+    if (isError) return <Navigate to={"/login"} />; // If error fetching user data, redirect to login page
 
-export default ProtectedPage;
+    // Now use the `data` object if you need to access user information
+    console.log("User data:", data); // For debugging or displaying user information
+
+    return (
+      <AppLayout>
+        <Outlet />
+      </AppLayout>
+    );
+  }
+
+
+}

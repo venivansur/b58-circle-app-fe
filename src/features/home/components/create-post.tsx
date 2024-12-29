@@ -1,10 +1,6 @@
 import { GalleryAdd } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 import {
-  createThreadSchema,
-  CreateThread,
-} from '@/utils/schemas/thread/create-thread';
-import {
   Box,
   Button,
   Image,
@@ -18,58 +14,152 @@ import {
   Spacer,
   Text,
   useDisclosure,
-  DialogTrigger,
 } from '@chakra-ui/react';
-import { useAuthStore } from '@/store/auth';
+import Swal from 'sweetalert2';
 import { Avatar } from '@/components/ui/avatar';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/libs/api';
+import {
+  createThreadSchema,
+  CreateThread,
+} from '@/utils/schemas/thread/create-thread';
+import { Thread } from '@/types/thread';
 
 export function CreatePost() {
+  const queryClient = useQueryClient();
   const { open, onOpen, onClose } = useDisclosure();
-  const inputFileRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuthStore();
-  const { register, handleSubmit } = useForm<CreateThread>({
+
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+ 
+  const [user, setUser] = useState<any>(null);
+
+ 
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      const fetchUserData = async () => {
+        try {
+          const response = await api.get(`/users/${userId}`);
+          setUser(response.data); 
+        } catch (err) {
+          console.error('Failed to fetch user data:', err);
+        }
+      };
+      fetchUserData();
+    }
+  }, []);
+
+  const createThread = async (formData: FormData) => {
+    const userString = localStorage.getItem('userId');
+    if (!userString) {
+      throw new Error('User is not authenticated');
+    }
+
+    const user = JSON.parse(userString);
+    const token = user.token;
+
+    const response = await api.post('/threads', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  };
+
+  const { register, handleSubmit, setValue } = useForm<CreateThread>({
     mode: 'onSubmit',
     resolver: zodResolver(createThreadSchema),
   });
 
-  const { ref: fileRef, ...registerFile } = register('file');
+  const mutation = useMutation({
+    mutationFn: (formData: FormData) => createThread(formData),
+    onSuccess: (newThread) => {
+      console.log('New thread created:', newThread);
 
-  const [threads, setThreads] = useState<CreateThread[]>([]);
+      const threadData = newThread.thread;
 
-  const onSubmit = (data: CreateThread) => {
-    const newThread = {
-      ...data,
-      file: data.file.length > 0 ? URL.createObjectURL(data.file[0]) : null,
-    };
+      // Invalidasi cache dan optimistik update
+      queryClient.invalidateQueries({ queryKey: ['threads'] });
+      queryClient.setQueryData<Thread[]>(['threads'], (oldData) => {
+        const updatedThreads = [threadData, ...(oldData || [])];
+        return updatedThreads;
+      });
 
-    setThreads((prevThreads) => [...prevThreads, newThread]);
-    alert('Post Thread Success!');
-    onClose();
+    
+      queryClient.refetchQueries({ queryKey: ['threads'] });
+
+      
+      Swal.fire({
+        title: 'Post Created!',
+        text: 'Post Thread Success!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        background: '#1E201E',
+        confirmButtonColor: '#347928',
+      });
+
+      onClose();
+    },
+  });
+  const onSubmit = async (data: CreateThread) => {
+    console.log('Form data:', data);
+    const formData = new FormData();
+    formData.append('content', data.content);
+
+    if (data.file) {
+      console.log('Appending file to FormData:', data.file);
+      formData.append('file', data.file);
+    } else {
+      console.log('No file selected');
+    }
+
+    mutation.mutate(formData);
+  };
+
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewImage(objectUrl);
+      setValue('file', file); 
+    }
   };
 
   return (
-    <Box>
+    <Box borderBottomWidth="1px" borderBottomColor={'gray.50'}>
       <Box
+        padding={5}
         display={'flex'}
         alignItems={'center'}
         gap={'20px'}
         w={'100%'}
-        marginY={'10'}
         onClick={onOpen}
       >
-        <Avatar src={user.profile.profilePicture} border={'2px solid white'} />
-
+        {user && (
+          <Avatar
+            src={user.profilePicture} 
+            border={'2px solid white'}
+          />
+        )}
         <Text color={'brand.secondary.500'}>What is happening?!</Text>
         <Spacer />
         <Image src={GalleryAdd} w="24px" />
         <GreenButton disabled>Post</GreenButton>
       </Box>
 
-      <DialogRoot open={open} onOpenChange={onClose} size="lg">
-        <DialogTrigger />
+      <DialogRoot
+        open={open}
+        onOpenChange={onClose}
+        size="lg"
+        placement={'center'}
+      >
         <DialogContent backgroundColor={'brand.background'}>
           <DialogHeader fontSize={'2xl'} color={'white'}>
             Create a New Post
@@ -83,10 +173,12 @@ export function CreatePost() {
                 gap="5px"
                 alignItems={'center'}
               >
-                <Avatar
-                  src={user.profile.profilePicture}
-                  border={'2px solid white'}
-                />
+                {user && (
+                  <Avatar
+                    src={user?.profilePicture } 
+                    border={'2px solid white'}
+                  />
+                )}
                 <Input
                   placeholder="What is happening?!"
                   color={'white'}
@@ -94,6 +186,18 @@ export function CreatePost() {
                   {...register('content')}
                 />
               </Box>
+
+         
+              {previewImage && (
+                <Box mt={4}>
+                  <Image
+                    src={previewImage}
+                    alt="Image preview"
+                    maxWidth="100px"
+                    borderRadius="md"
+                  />
+                </Box>
+              )}
             </DialogBody>
 
             <DialogFooter
@@ -104,50 +208,27 @@ export function CreatePost() {
               <Input
                 type="file"
                 hidden
-                ref={(e) => {
-                  (inputFileRef as any).current = e;
-                  fileRef(e);
-                }}
-                {...registerFile}
+                {...register('file')} 
+                onChange={handleFileChange} 
               />
+
               <Button
                 variant="outline"
-                onClick={() => inputFileRef.current?.click()}
+                onClick={() => {
+                  const fileInput = document.querySelector(
+                    'input[type="file"]'
+                  ) as HTMLInputElement;
+                  fileInput?.click(); 
+                }}
               >
                 <Image src={GalleryAdd} w="24px" />
               </Button>
               <Spacer />
-              <GreenButton type="submit">{'Post'}</GreenButton>
+              <GreenButton type="submit">Post</GreenButton>
             </DialogFooter>
           </form>
         </DialogContent>
       </DialogRoot>
-
-      <Box mt={5}>
-        {threads.map((thread, index) => (
-          <Box
-            key={index}
-            p={4}
-            bg="gray.700"
-            borderRadius="md"
-            mb={3}
-            boxShadow="md"
-          >
-            <Text color="white" mb={2}>
-              {thread.content}
-            </Text>
-            {thread.file && (
-              <Image
-                src={thread.file}
-                alt="Uploaded File"
-                borderRadius="md"
-                objectFit="cover"
-                maxH="300px"
-              />
-            )}
-          </Box>
-        ))}
-      </Box>
     </Box>
   );
 }

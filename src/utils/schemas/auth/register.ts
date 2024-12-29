@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 export const registerFormSchema = z.object({
-  name: z.string(),
-  email: z.string().min(3),
-  password: z.string().min(6),
-  address: z.string(),
+  fullName: z.string().min(1, "Name is required"), 
+  email: z
+    .string()
+    .email("Invalid email format") 
+    .min(3, "Email must be at least 3 characters long"), 
+  password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
 export type RegisterForm = z.infer<typeof registerFormSchema>;

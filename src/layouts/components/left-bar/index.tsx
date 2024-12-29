@@ -1,4 +1,13 @@
-import { Logo, Logout } from '@/assets/index';
+import {
+  Logo,
+  Logout,
+  GalleryAdd,
+} from '@/assets/index';
+import {
+  createThreadSchema,
+  CreateThread,
+} from '@/utils/schemas/thread/create-thread';
+import { Avatar } from '@/components/ui/avatar';
 import { GreenButton } from '@/components/ui/green-button';
 import {
   Box,
@@ -14,28 +23,66 @@ import {
   DialogCloseTrigger,
   Input,
   useDisclosure,
+  Spacer
 } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { leftBarMenu } from '../../constants/left-bar.constant';
 import { useAuthStore } from '@/store/auth';
 import { Link as ChakraLink } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Swal from 'sweetalert2';
 
 export function LeftBar() {
   const location = useLocation();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { register, handleSubmit } = useForm<CreateThread>({
+    mode: 'onSubmit',
+    resolver: zodResolver(createThreadSchema),
+  });
   const { clearUser } = useAuthStore();
+  const [threads, setThreads] = useState<CreateThread[]>([]);
+  const { ref: fileRef, ...registerFile } = register('file');
   const { open, onOpen, onClose } = useDisclosure();
   const [postContent, setPostContent] = useState('');
-
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const handleLogout = () => {
-    clearUser();
-    localStorage.removeItem('auth-storage');
-    navigate('/login');
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, logout!',
+      background:'#1E201E',
+      confirmButtonColor: '#347928',
+      cancelButtonText: 'No, cancel!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        clearUser();
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId")
+        localStorage.removeItem("userProfile");
+        navigate('/login');
+      }
+    });
   };
 
-  const handleCreatePost = () => {
-    alert(`Post Created: ${postContent}`);
+  const onSubmit = (data: CreateThread) => {
+    const newThread = {
+      ...data,
+      file: data.file.length > 0 ? URL.createObjectURL(data.file[0]) : null,
+    };
+    setThreads((prevThreads) => [...prevThreads, newThread]);
+    Swal.fire({
+      title: 'Post Created!',
+      text: `Your post content: "${postContent}"`,
+      icon: 'success',  
+      confirmButtonText: 'OK',
+      background:'#1E201E',
+      confirmButtonColor: '#347928',
+    });
     setPostContent('');
     onClose();
   };
@@ -87,37 +134,83 @@ export function LeftBar() {
           Create Post
         </GreenButton>
 
-        <Dialog.Root open={open} onOpenChange={onClose}>
+        <Dialog.Root open={open} onOpenChange={onClose} placement={"center"}>
           <DialogTrigger />
-          <DialogContent>
-            <DialogHeader>Create a New Post</DialogHeader>
+          <DialogContent backgroundColor={'brand.background'}>
+            <DialogHeader fontSize={'2xl'} color={'white'}>Create a New Post</DialogHeader>
             <DialogCloseTrigger />
-            <DialogBody>
-              <Input
-                placeholder="What is happening?!"
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-              />
-            </DialogBody>
-            <DialogFooter>
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                colorScheme="blue"
-                ml={3}
-                onClick={handleCreatePost}
-                disabled={!postContent.trim()}
-              >
-                Post
-              </Button>
-            </DialogFooter>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <DialogBody>
+                <Box
+                  display={'flex'}
+                  paddingY={'20px'}
+                  gap="5px"
+                  alignItems={'center'}
+                >
+                  {user && user.profile && <Avatar
+                    src={user.profile.profilePicture}
+                    border={'2px solid white'}
+                  />}
+                  <Input
+                    placeholder="What is happening?!"
+                    color={'white'}
+                    variant="flushed"
+                    {...register('content')}
+                  />
+                </Box>
+              </DialogBody>
+              <DialogFooter>
+                <Input
+                  type="file"
+                  hidden
+                  ref={(e) => {
+                    (inputFileRef as any).current = e;
+                    fileRef(e);
+                  }}
+                  {...registerFile}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => inputFileRef.current?.click()}
+                >
+                  <Image src={GalleryAdd} w="24px" />
+                </Button>
+                <Spacer />
+                <GreenButton type="submit">{'Post'}</GreenButton>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog.Root>
-
+        <Box mt={5}>
+          <Box>
+            {threads.map((thread, index) => (
+              <Box
+                key={index}
+                p={4}
+                bg="gray.700"
+                borderRadius="md"
+                mb={3}
+                boxShadow="md"
+              >
+                <Text color="white" mb={2}>
+                  {thread.content}
+                </Text>
+                {thread.file && (
+                  <Image
+                    src={thread.file}
+                    alt="Uploaded File"
+                    borderRadius="md"
+                    objectFit="cover"
+                    maxH="300px"
+                  />
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Box>
         <Button
           onClick={handleLogout}
-          marginTop={'270px'}
+          marginTop={'200px'}
           justifyContent={'flex-start'}
           display={'flex'}
           alignItems={'center'}
@@ -127,7 +220,7 @@ export function LeftBar() {
             backgroundColor: 'rgba(255,255,255, 0.1)',
           }}
         >
-          <Image src={Logout} w={'24px'} />{' '}
+          <Image src={Logout} w={'24px'} />
           <ChakraLink color={'white'}>Logout</ChakraLink>
         </Button>
       </Box>

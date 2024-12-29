@@ -2,8 +2,11 @@ import { Box } from "@chakra-ui/react";
 import { MyProfile } from "./left-bar/my-profile";
 import { Credit } from "./left-bar/credit";
 import { SuggestedUser } from "./left-bar/sugest-user";
+import { useLocation } from 'react-router-dom';
 
 export function RightBar() {
+  const location = useLocation();
+
   return (
     <Box
       width={"563px"}
@@ -12,7 +15,8 @@ export function RightBar() {
       borderColor={"brand.outline"}
       borderStyle={"solid"}
     >
-      <MyProfile />
+     
+      {location.pathname !== '/profile' && <MyProfile />}
       <SuggestedUser />
       <Credit />
     </Box>

@@ -1,4 +1,4 @@
-// Icons
+
 import Follows from "./icons/follows.svg";
 import FollowsOutline from "./icons/follows-outline.svg";
 import Home from "./icons/home.svg";
@@ -11,7 +11,7 @@ import Logo from "./icons/logo.svg";
 import Logout from "./icons/logout.svg";
 import GalleryAdd from './icons/gallery-add.svg'
 
-// Image
+
 import BGProfileCover from "./img/cover.png";
 
 export {

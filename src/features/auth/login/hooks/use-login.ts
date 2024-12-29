@@ -1,11 +1,10 @@
-import fakeUser from "@/datas/user.json";
-import { useAuthStore } from "@/store/auth";
-import { User } from "@/types/user";
+import { useLogin } from "@/services/auth";
 import { LoginForm, loginFormSchema } from "@/utils/schemas/auth/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; 
 
 export const useLoginForm = () => {
   const {
@@ -16,28 +15,48 @@ export const useLoginForm = () => {
     mode: "onSubmit",
     resolver: zodResolver(loginFormSchema),
   });
-
-  const { setUser } = useAuthStore();
+  const { mutateAsync } = useLogin();
   const navigate = useNavigate();
 
   const onSubmit = useCallback(
-    (data: LoginForm) => {
-      const user = fakeUser.find(
-        (user) =>
-          user.email === data.emailOrUsername ||
-          user.username === data.emailOrUsername
-      ) as User;
+    async (data: LoginForm) => {
+      try {
+        const response = await mutateAsync(data);
+const { token, user } = response.data; 
+const userId = user.id; 
 
-      if (!user) return alert("Email / password is wrong!");
+localStorage.setItem("userId", JSON.stringify(userId));  
+localStorage.setItem("token", token); 
 
-      if (!(user?.password === data.password))
-        return alert("Email / password is wrong!");
+console.log("Token dan userId berhasil disimpan:", token, userId);
 
-      user.password = "";
-      setUser(user);
-      navigate("/");
+
+     
+        Swal.fire({
+          title: 'Success',
+          text: 'You have logged in successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#347928',
+          background: '#1E201E',
+        });
+
+       
+        navigate("/");
+      } catch (error) {
+        console.error("Error saat login:", error);
+
+        Swal.fire({
+          title: 'Error',
+          text: 'Login failed. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#347928',
+          background: '#1E201E',
+        });
+      }
     },
-    [navigate, setUser]
+    [mutateAsync, navigate]
   );
 
   return {

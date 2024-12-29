@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
           Forgot Password
         </Text>
         <Input
-          placeholder="Email/Username"
+          placeholder="Email"
           {...register('emailOrUsername')}
           color={'white'}
         />
@@ -31,12 +31,16 @@ export function ForgotPasswordForm() {
           </Text>
         ) : null}
 
-        <Box display={'flex'} justifyContent={'flex-end'}>
-          <ChakraLink as={ReactRouterLink} href={'/login'} color="white">
-            Already Have Account?Login
+       
+        <GreenButton type="submit">Send Instruction</GreenButton>
+        <Box display={'flex'} >
+          <Text color={"white"}>
+            Already have account?
+          </Text>
+          <ChakraLink as={ReactRouterLink} href={'/login'} color="green">
+            Login
           </ChakraLink>
         </Box>
-        <GreenButton type="submit">Send Instruction</GreenButton>
       </Box>
     </form>
   );

@@ -1,9 +1,10 @@
 import { Logo } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
-import { Box, Link as ChakraLink, Image, Input, Text } from '@chakra-ui/react';
+import { Box, Link as ChakraLink, Image, Input, Text, HStack } from '@chakra-ui/react';
 import { useLoginForm } from '../hooks/use-login';
 
 export function LoginForm() {
+
   const { register, onSubmit, handleSubmit, errors } = useLoginForm();
 
   return (
@@ -50,6 +51,16 @@ export function LoginForm() {
         </Box>
         <GreenButton type="submit">Login</GreenButton>
       </Box>
+      <Box>
+          <HStack>
+            <Text color={"white"}>
+              Dont have an account yet? 
+            </Text>
+          <ChakraLink href={'/register'} color="green">
+            Create account
+          </ChakraLink>
+          </HStack>
+       </Box>
     </form>
   );
 }

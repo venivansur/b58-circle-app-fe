@@ -2,15 +2,22 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { LeftBar } from './components/left-bar';
 import { RightBar } from './components/right-bar';
+import { useLocation } from 'react-router-dom';
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+
+
+  const hideBars = location.pathname.startsWith('/post-image/');
+
   return (
     <Box display="flex" height="100vh" overflow="hidden">
-      <LeftBar />
+  
+      {!hideBars && <LeftBar />}
 
       <Box
         width="748px"
-        mx="30px"
+        
         my="10px"
         flex="1"
         overflowY="auto"
@@ -23,7 +30,8 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         {children}
       </Box>
 
-      <RightBar />
+    
+      {!hideBars && <RightBar />}
     </Box>
   );
 };

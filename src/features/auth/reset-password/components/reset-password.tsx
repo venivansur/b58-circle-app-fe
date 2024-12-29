@@ -44,7 +44,6 @@ export function ResetPasswordForm() {
           </Text>
         ) : null}
 
-       
         <GreenButton type="submit">Create New Password</GreenButton>
       </Box>
     </form>

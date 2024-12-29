@@ -1,57 +1,60 @@
-import { createBrowserRouter } from "react-router-dom";
-import  DetailPostRoute  from "./detail-post";
-import { FollowsRoute } from "./follows";
-import { ForgotPasswordRoute } from "./forgot-password";
-import { HomeRoute } from "./home";
-import { LoginRoute } from "./login";
-import { ProfileRoute } from "./profile";
-import PrivateRoute from "./protect-route";
-import { RegisterRoute } from "./register";
-import { ResetPasswordRoute } from "./reset-password";
-import { SearchRoute } from "./search";
+import { createBrowserRouter } from 'react-router-dom';
+import { DetailPostRoute } from './detail-post';
+import { DetailPostImageRoute } from './detail-post-image';
+import { FollowsRoute } from './follows';
+import { ForgotPasswordRoute } from './forgot-password';
+import { HomeRoute } from './home';
+import { LoginRoute } from './login';
+import { ProfileRoute } from './profile';
+import {ProtectedRoute} from './protect-route';
+import { RegisterRoute } from './register';
+import { ResetPasswordRoute } from './reset-password';
+import { SearchRoute } from './search';
 
 export const router = createBrowserRouter([
   {
-    element: (
-      <PrivateRoute/>
-    ),
+    element: <ProtectedRoute/>,
     children: [
       {
-        path: "/",
+        path: '/',
         element: <HomeRoute />,
       },
       {
-        path: "/search",
+        path: '/search',
         element: <SearchRoute />,
       },
       {
-        path: "/profile",
+        path: '/profile',
         element: <ProfileRoute />,
       },
       {
-        path: "/follows",
+        path: '/follows',
         element: <FollowsRoute />,
       },
       {
-        path: "/post/:id",
+        path: '/post/:id',
         element: <DetailPostRoute />,
+      },
+      {
+        path: '/post-image/:id',
+        element: <DetailPostImageRoute />,
       },
     ],
   },
   {
-    path: "/login",
+    path: '/login',
     element: <LoginRoute />,
   },
   {
-    path: "/register",
+    path: '/register',
     element: <RegisterRoute />,
   },
   {
-    path: "/reset-password",
+    path: '/reset-password',
     element: <ResetPasswordRoute />,
   },
   {
-    path: "/forgot-password",
+    path: '/forgot-password',
     element: <ForgotPasswordRoute />,
   },
 ]);

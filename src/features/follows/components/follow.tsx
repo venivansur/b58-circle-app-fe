@@ -1,24 +1,58 @@
-import fakeUsers from '@/datas/user.json';
 import { Box, Spacer, Text, Button, Flex } from '@chakra-ui/react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { User } from '@/types/user';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar } from '@/components/ui/avatar';
+import { api } from '@/libs/api';
+
 export function Follows() {
   const [tabValue, setTabValue] = useState('Followers');
-  const [Follows] = useState<User[]>(fakeUsers);
+  const [followers, setFollowers] = useState<User[]>([]);
+  const [following, setFollowing] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const userId = parseInt(localStorage.getItem('userId') || '0', 10);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const followersResponse = await api.get(`/users/${userId}/followers`);
+        const followingResponse = await api.get(`/users/${userId}/following`);
+  
+        console.log('Followers Response:', followersResponse.data);  
+        console.log('Following Response:', followingResponse.data);  
+  
+        if (followersResponse.data && followersResponse.data.length > 0) {
+          setFollowers(followersResponse.data);
+        } else {
+          setFollowers([]);
+        }
+  
+        if (followingResponse.data && followingResponse.data.length > 0) {
+          setFollowing(followingResponse.data);
+        } else {
+          setFollowing([]);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch followers or following');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [userId]);
+  
 
   const filteredUsers =
-    tabValue === 'Followers'
-      ? Follows.filter((user) => user.isFollowed)
-      : Follows.filter((user) => user.following);
+    tabValue === 'Followers' ? followers : following;
 
   return (
-    <Box>
-      <Text color={'white'} fontSize="xl" fontWeight="bold" mb={4}>
-        Follows
-      </Text>
-
+    <Box padding={5}>
       <Tabs.Root value={tabValue} onValueChange={setTabValue}>
         <Box position="relative">
           <Tabs.List
@@ -66,71 +100,83 @@ export function Follows() {
         </Box>
 
         <Tabs.Content value="Followers">
-          {filteredUsers.slice(0, 10).map((user, index) => (
-            <Flex
-              key={index}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              mb={4}
-            >
-              <Avatar
-                src={user.profile.profilePicture}
-                name={user.profile.fullName}
-                size="md"
-                border="2px solid white"
-              />
-              <Box ml={3}>
-                <Text color="white">{user.profile.fullName}</Text>
-                <Text fontSize="sm" color="gray.400">
-                  @{user.username}
-                </Text>
-              </Box>
-              <Spacer />
-              <Button
-                disabled={user.isFollowed}
-                variant="outline"
-                colorScheme="whiteAlpha"
-                color={'white'}
+          {loading ? (
+            <Text color="white">Loading...</Text>
+          ) : error ? (
+            <Text color="red.500">{error}</Text>
+          ) : (
+            filteredUsers.slice(0, 10).map((user, index) => (
+              <Flex
+                key={index}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={4}
               >
-                {user.isFollowed ? 'Followed' : 'Follow'}
-              </Button>
-            </Flex>
-          ))}
+                <Avatar
+                  src={user.profilePicture}
+                  name={user.fullName}
+                  size="md"
+                  border="2px solid white"
+                />
+                <Box ml={3}>
+                  <Text color="white">{user.fullName}</Text>
+                  <Text fontSize="sm" color="gray.400">
+                    @{user.username}
+                  </Text>
+                </Box>
+                <Spacer />
+                <Button
+                  disabled={user.isFollowed}
+                  variant="outline"
+                  colorScheme="whiteAlpha"
+                  color={'white'}
+                >
+                  {user.isFollowed ? 'Followed' : 'Follow'}
+                </Button>
+              </Flex>
+            ))
+          )}
         </Tabs.Content>
 
         <Tabs.Content value="Following">
-          {filteredUsers.slice(0, 10).map((user, index) => (
-            <Flex
-              key={index}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              mb={4}
-            >
-              <Avatar
-                src={user.profile.profilePicture}
-                name={user.profile.fullName}
-                size="md"
-                border="2px solid white"
-              />
-              <Box ml={3}>
-                <Text color="white">{user.profile.fullName}</Text>
-                <Text fontSize="sm" color="gray.400">
-                  @{user.username}
-                </Text>
-              </Box>
-              <Spacer />
-              <Button
-                disabled={user.isFollowed}
-                variant="outline"
-                colorScheme="whiteAlpha"
-                color={'white'}
+          {loading ? (
+            <Text color="white">Loading...</Text>
+          ) : error ? (
+            <Text color="red.500">{error}</Text>
+          ) : (
+            filteredUsers.slice(0, 10).map((user, index) => (
+              <Flex
+                key={index}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={4}
               >
-                {user.isFollowed ? 'Followed' : 'Follow'}
-              </Button>
-            </Flex>
-          ))}
+                <Avatar
+                  src={user.profilePicture}
+                  name={user.fullName}
+                  size="md"
+                  border="2px solid white"
+                />
+                <Box ml={3}>
+                  <Text color="white">{user.fullName}</Text>
+                  <Text fontSize="sm" color="gray.400">
+                    @{user.username}
+                  </Text>
+                </Box>
+                <Spacer />
+                <Button
+                  disabled={user.isFollowed}
+                  variant="outline"
+                  colorScheme="whiteAlpha"
+                  color={'white'}
+                >
+                  {user.isFollowed ? 'Followed' : 'Follow'}
+                </Button>
+              </Flex>
+            ))
+          )}
         </Tabs.Content>
       </Tabs.Root>
     </Box>

@@ -1,5 +1,5 @@
 import React from "react";
-import { system } from "./libs/chakra-theme"; 
+import { system } from "../libs/chakra-theme"; 
 import { ChakraProvider } from "@chakra-ui/react"; 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

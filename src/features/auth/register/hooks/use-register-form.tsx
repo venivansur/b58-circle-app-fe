@@ -1,12 +1,10 @@
-import {
-  RegisterForm,
-  registerFormSchema,
-} from '@/utils/schemas/auth/register';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from "@/libs/api";
+import { RegisterForm, registerFormSchema } from "@/utils/schemas/auth/register";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export const useRegisterForm = () => {
   const {
@@ -14,7 +12,7 @@ export const useRegisterForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterForm>({
-    mode: 'onSubmit',
+    mode: "onSubmit",
     resolver: zodResolver(registerFormSchema),
   });
 
@@ -22,31 +20,32 @@ export const useRegisterForm = () => {
 
   const onSubmit = useCallback(
     async (data: RegisterForm) => {
-      const { email, name, password } = data;
+      const { email, fullName, password } = data;
 
       try {
-        const response = await axios.post(
-          'https://jsonplaceholder.typicode.com/users',
-          {
-            name,
-            email,
-            password,
-          }
-        );
+        await api.post<unknown, unknown, RegisterForm>("/auth/register", {
+          fullName,
+          email,
+          password,
+        });
 
-        console.log('Registration successful:', response.data);
-
-        alert('Berhasil register!');
-
-        navigate('/login');
+       
+        Swal.fire({
+          title: "Registration Successful!",
+          text: "You have successfully registered. Please log in.",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/login");
+        });
       } catch (error) {
-        console.error('Error during registration:', error);
-
-        if (axios.isAxiosError(error)) {
-          alert('Gagal register, silakan coba lagi.');
-        } else {
-          alert('Terjadi kesalahan, coba lagi.');
-        }
+       
+        Swal.fire({
+          title: "Registration Failed",
+          text: "There was an issue with your registration. Please try again.",
+          icon: "error",
+          confirmButtonText: "Retry",
+        });
       }
     },
     [navigate]

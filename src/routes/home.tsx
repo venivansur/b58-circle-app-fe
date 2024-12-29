@@ -5,9 +5,11 @@ import { Box, Text } from '@chakra-ui/react';
 export function HomeRoute() {
   return (
     <Box>
-      <Text as={'h1'} color="white" fontWeight={'bold'} fontSize={'xl'}>
-        Home
-      </Text>
+      <Box padding={5}>
+        <Text as={'h1'} color="white" fontWeight={'bold'} fontSize={'xl'}>
+          Home
+        </Text>
+      </Box>
 
       <CreatePost />
       <ListPost />
