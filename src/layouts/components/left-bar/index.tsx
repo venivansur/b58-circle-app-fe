@@ -148,7 +148,7 @@ export function LeftBar() {
                   alignItems={'center'}
                 >
                   {user && user.profile && <Avatar
-                    src={user.profile.profilePicture}
+                    src={user.profilePicture}
                     border={'2px solid white'}
                   />}
                   <Input

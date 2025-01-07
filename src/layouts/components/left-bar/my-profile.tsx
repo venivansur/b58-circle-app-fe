@@ -111,9 +111,12 @@ export function MyProfile({ selectedUserId }: { selectedUserId?: string }) {
               ...user,
               fullName: profileData.fullName,
               username: profileData.username,
-              bio: profileData.bio,
+              
               profilePicture: profileData.profilePicture,
-            });
+              profile: {
+                ...user.profile, // Pastikan data profil sebelumnya tetap ada
+                bio: profileData.bio, // Masukkan bio ke dalam profile
+            }});
           }
     
           Swal.fire({
