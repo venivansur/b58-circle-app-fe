@@ -1,51 +1,53 @@
-import fakeUser from "@/datas/user.json";
-import { useAuthStore } from "@/store/auth";
-import { User } from "@/types/user";
-import { ForgotForm, ForgotFormSchema } from "@/utils/schemas/auth/forgot-password";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
+import { api } from "@/libs/api";
+import Swal from "sweetalert2";
+import { ForgotForm } from "@/utils/schemas/auth/forgot-password";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ForgotFormSchema } from "@/utils/schemas/auth/forgot-password";
 
 export const useForgotForm = () => {
+  const [loading, setLoading] = useState(false); 
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotForm>({
-    mode: "onSubmit",
     resolver: zodResolver(ForgotFormSchema),
   });
 
-  const { setUser } = useAuthStore();
-  const navigate = useNavigate();
+  const onSubmit = useCallback(async (data: ForgotForm) => {
+    setLoading(true); 
+    try {
+      const response = await api.post("/auth/forgot-password", data);
 
-  const onSubmit = useCallback(
-    (data: ForgotForm) => {
      
-      const user = fakeUser.find(
-        (user) =>
-          user.email === data.emailOrUsername ||
-          user.username === data.emailOrUsername
-      ) as User | undefined; 
-
-      if (user) {
-      
-        user.password = ""; 
-        setUser(user); 
-        navigate("/login");
-      } else {
-       
-        alert("User tidak ditemukan!");
-      }
-    },
-    [navigate, setUser]
-  );
+      Swal.fire({
+        title: "Success",
+        text: response.data.message,
+        icon: "success",
+        confirmButtonColor: '#347928',
+        background: "#1E201E",
+      });
+    } catch (error: any) {
+      Swal.fire({
+        title: "Error",
+        text:
+          error.response?.data?.message ||
+          "Terjadi kesalahan saat mengirim email reset password.",
+        icon: "error",
+      });
+    } finally {
+      setLoading(false); 
+    }
+  }, []);
 
   return {
     register,
     onSubmit,
     handleSubmit,
     errors,
+    loading, 
   };
 };

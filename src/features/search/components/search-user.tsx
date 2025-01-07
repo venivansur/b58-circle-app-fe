@@ -5,56 +5,106 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
-import { User } from '@/types/user';
 import { Avatar } from '@/components/ui/avatar';
 import { api } from '@/libs/api';
+import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/store/auth';
+import { useFollowStore } from '@/store/follow';
+import { User } from '@/types/user';
 
 export function SearchUser() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const { user } = useAuthStore();
+  const { following, setFollowing,toggleFollow,setFollowers } = useFollowStore();
+  const userId = user?.id;
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
+    if (!userId) return;
+
+    const fetchData = async () => {
+  
+      setError(null);
+
       try {
         const response = await api.get('/users');
-        setSearchResults(response.data);
+        setUsers(response.data || []);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError('Failed to fetch users');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
-  }, []);
+    fetchData();
+  }, [userId]);
 
-  const handleFollow = async (userId: number, isFollowed: boolean) => {
+
+  useEffect(() => {
+    if (!users.length || !following.length) return;
+
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        following.some((followedUser) => followedUser.id === user.id)
+          ? { ...user, isFollowed: true }
+          : { ...user, isFollowed: false }
+      )
+    );
+  }, [following, users]);
+
+  const handleToggleFollow = async (targetUserId: string, isCurrentlyFollowing: boolean) => {
+   
+
+  
+    toggleFollow(targetUserId, !isCurrentlyFollowing);
+
+    if (isCurrentlyFollowing) {
+      setFollowing(following.filter((user) => user.id !== targetUserId));
+    } else {
+      const newFollowing = [...following, { id: targetUserId }];
+      setFollowing(newFollowing as any);
+    }
+
     try {
-      setLoading(true);
-      const response = isFollowed
-        ? await api.post(`/users/${userId}/unfollow`) // Jika mengikuti, lakukan unfollow
-        : await api.post(`/users/${userId}/follow`); // Jika tidak mengikuti, lakukan follow
+      const endpoint = isCurrentlyFollowing
+        ? `/users/${targetUserId}/follow`
+        : `/users/${targetUserId}/follow`; 
 
-      if (response.data.success) {
-        setSearchResults((prev) =>
-          prev.map((user) =>
-            user.id === userId ? { ...user, isFollowed: !isFollowed } : user
-          )
-        );
+      const response = await api.post(endpoint);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
       }
-    } catch (error) {
-      setError('Failed to update follow status');
-    } finally {
-      setLoading(false);
+
+      const [followersResponse, followingResponse] = await Promise.all([
+        api.get(`/users/${userId}/followers`),
+        api.get(`/users/${userId}/following`),
+      ]);
+
+      setFollowers(followersResponse.data || []);
+      setFollowing(followingResponse.data || []);
+    } catch (err: any) {
+      console.error('Error toggling follow:', err.response?.data || err.message);
+      toggleFollow(targetUserId, isCurrentlyFollowing); 
+
+    
+      if (isCurrentlyFollowing) {
+        setFollowing(following);
+      } else {
+        setFollowing(following.filter((user) => user.id !== targetUserId));
+      }
     }
   };
 
-  const filteredResults = searchResults.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  const filteredResults = searchTerm
+    ? users.filter((user) =>
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) && user.id !== userId
+      )
+    : users.filter((user) => user.id !== userId);
 
   return (
     <Box margin="30px">
@@ -70,7 +120,7 @@ export function SearchUser() {
         <Text color="white">Loading...</Text>
       ) : error ? (
         <Text color="red.500">{error}</Text>
-      ) : !searchTerm ? (
+      ) : filteredResults.length === 0 && searchTerm ? (
         <Box
           w="100%"
           h="500px"
@@ -78,24 +128,7 @@ export function SearchUser() {
           justifyContent="center"
           alignItems="center"
         >
-          <Text color="white">Type a username to search</Text>
-        </Box>
-      ) : filteredResults.length === 0 ? (
-        <Box
-          w="100%"
-          h="500px"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexDirection="column"
-          textAlign="center"
-        >
-          <Text fontWeight="bold" fontSize="lg" color="white">
-            No results for "{searchTerm}"
-          </Text>
-          <Text color="brand.secondary.500">
-            Try searching for something else or check the spelling.
-          </Text>
+          <Text color="white">No results found</Text>
         </Box>
       ) : (
         <Box>
@@ -105,16 +138,22 @@ export function SearchUser() {
                 <Avatar src={user.profilePicture} />
               </Box>
               <Box flex="8">
-                <Text color="white">{user.fullName}</Text>
+                <Link to={`/profile-page/${user.id}`}>
+                  <Text
+                    color="white"
+                    fontWeight="bold"
+                    _hover={{ textDecoration: 'none' }}
+                  >
+                    {user.fullName}
+                  </Text>
+                </Link>
                 <Text color="brand.secondary.400">@{user.username}</Text>
-                <Text color="white">{user.profile.bio}</Text>
+                <Text color="white">{user.profile?.bio || 'No bio available'}</Text>
               </Box>
               <Button
-                onClick={() =>
-                  handleFollow(Number(user.id), user.isFollowed)
-                }
-                variant="outline"
-                color="white"
+                onClick={() => handleToggleFollow(user.id, user.isFollowed)}
+                variant="subtle"
+                color="black"
                 flex="1"
                 disabled={loading}
               >

@@ -6,7 +6,7 @@ export function DetailPostImageRoute() {
   
      <>
       <Text as={'h1'} color="white" fontWeight={'bold'} fontSize={'xl'}>
-        Detail Post Image
+      
       </Text>
        <PostWithImageDetail />
       </>

@@ -1,5 +1,5 @@
 export interface User {
-  email: string;
+  email?: string;
   id:string;
   fullName: string;
   token:string;
@@ -8,8 +8,10 @@ export interface User {
   profile: Profile;
   followers: number;
   following: number;
+  
   isFollowed: boolean;
   profilePicture: string;
+  bio?: string
 }
 
 export interface Profile {
@@ -35,7 +37,7 @@ export interface UserJWTPayload {
   exp: number;
 };
 export interface UpdateUserPayload {
-  id: string;
+ 
   fullName: string;
   username: string;
   bio: string;

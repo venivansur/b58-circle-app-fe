@@ -1,27 +1,50 @@
-import {create} from 'zustand';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { User } from '@/types/user'; // Tipe User
 
-
-interface UserStore {
-  following: string[]; 
-  followers: string[];
-  toggleFollow: (targetUserId: string) => void; 
+interface FollowState {
+  followers: User[]; 
+  following: User[]; 
+  suggestedUsers: Array<any>; 
+  setFollowers: (users: User[]) => void; 
+  setFollowing: (users: User[]) => void; 
+  setSuggestedUsers: (users: User[]) => void; 
+  toggleFollow: (userId: string, isFollowed: boolean) => void; 
 }
 
-export const useFollowStore = create<UserStore>((set) => ({
-  following: [],
-  followers: [],
-  toggleFollow: (targetUserId: string) => set((state) => {
-    const isFollowing = state.following.includes(targetUserId);
+export const useFollowStore = create(
+  persist<FollowState>(
+    (set) => ({
+      followers: [], 
+      following: [], 
+      suggestedUsers: [],
 
- 
-    if (isFollowing) {
-      return {
-        following: state.following.filter(id => id !== targetUserId),
-      };
-    } else {
-      return {
-        following: [...state.following, targetUserId],
-      };
+
+      setFollowers: (users) => set({ followers: users }),
+
+      setFollowing: (users) => set({ following: users }),
+
+      setSuggestedUsers: (users) => set({ suggestedUsers: users }),
+
+    
+      toggleFollow: (userId, isFollowed) =>
+        set((state) => {
+          const updatedFollowing = isFollowed
+            ? state.following.filter((user) => user.id !== userId) 
+            : [...state.following, { id: userId, isFollowed } as User];
+      
+          return {
+            ...state,
+            following: updatedFollowing,
+            suggestedUsers: state.suggestedUsers.map((user) =>
+              user.id === userId ? { ...user, isFollowed: !isFollowed } : user
+            ),
+          };
+        }),
+      
+    }),
+    {
+      name: 'follow-storage', 
     }
-  }),
-}));
+  )
+);

@@ -1,7 +1,6 @@
-import { Logo } from '@/assets/index';
-import { GreenButton } from '@/components/ui/green-button';
 import { Box, Image, Input, Text } from '@chakra-ui/react';
-
+import { GreenButton } from '@/components/ui/green-button';
+import { Logo } from '@/assets/index';
 import { useResetForm } from '../hooks/use-reset-password';
 
 export function ResetPasswordForm() {
@@ -14,36 +13,24 @@ export function ResetPasswordForm() {
         flexDirection={'column'}
         gap={'10px'}
         width={'305px'}
+        margin="auto"
+        marginTop="100px"
       >
-        <Image src={Logo} width={'100px'} />
+        <Image src={Logo} width={'100px'} alt="Logo"  />
         <Text as={'h1'} fontSize={'2xl'} color="white" fontWeight={'bold'}>
           Reset Password
         </Text>
         <Input
           placeholder="New Password"
-          {...register('resetPassword')}
+          {...register('password')}
           color={'white'}
+          type="password"
         />
-
-        {errors.resetPassword ? (
+        {errors.password && (
           <Text as={'span'} color={'red'}>
-            {errors.resetPassword.message}
+            {errors.password.message}
           </Text>
-        ) : null}
-
-        <Input
-          type="Confirm Reset Password"
-          placeholder="Confirm Reset Password"
-          {...register('confirmResetPassword')}
-          color={'white'}
-        />
-
-        {errors.confirmResetPassword ? (
-          <Text as={'span'} color={'red'}>
-            {errors.confirmResetPassword.message}
-          </Text>
-        ) : null}
-
+        )}
         <GreenButton type="submit">Create New Password</GreenButton>
       </Box>
     </form>

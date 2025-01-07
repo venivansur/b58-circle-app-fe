@@ -35,6 +35,8 @@ export const useRegisterForm = () => {
           text: "You have successfully registered. Please log in.",
           icon: "success",
           confirmButtonText: "OK",
+          confirmButtonColor: '#347928',
+          background: '#1E201E',
         }).then(() => {
           navigate("/login");
         });
@@ -45,6 +47,7 @@ export const useRegisterForm = () => {
           text: "There was an issue with your registration. Please try again.",
           icon: "error",
           confirmButtonText: "Retry",
+          background: '#1E201E',
         });
       }
     },

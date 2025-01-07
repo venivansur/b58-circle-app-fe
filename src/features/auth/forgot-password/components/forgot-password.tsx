@@ -1,11 +1,10 @@
 import { Logo } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
-import { Box, Link as ChakraLink, Image, Input, Text } from '@chakra-ui/react';
-import { Link as ReactRouterLink } from 'react-router-dom';
+import { Box, Link as ChakraLink, Image, Input, Text, Spinner } from '@chakra-ui/react';
 import { useForgotForm } from '../hooks/use-forgot-password';
 
 export function ForgotPasswordForm() {
-  const { register, onSubmit, handleSubmit, errors } = useForgotForm();
+  const { register, onSubmit, handleSubmit, errors, loading } = useForgotForm(); // Pastikan loading dihandle dalam hook
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -31,13 +30,15 @@ export function ForgotPasswordForm() {
           </Text>
         ) : null}
 
-       
-        <GreenButton type="submit">Send Instruction</GreenButton>
-        <Box display={'flex'} >
+        <GreenButton type="submit" disabled={loading}>
+          {loading ? <Spinner size="sm" /> : 'Send Instruction'}
+        </GreenButton>
+
+        <Box display={'flex'}>
           <Text color={"white"}>
             Already have account?
           </Text>
-          <ChakraLink as={ReactRouterLink} href={'/login'} color="green">
+          <ChakraLink href={'/login'} color="green">
             Login
           </ChakraLink>
         </Box>

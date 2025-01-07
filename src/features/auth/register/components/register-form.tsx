@@ -1,7 +1,6 @@
 import { Logo } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 import { Image, Box, Link as ChakraLink, Input, Text, HStack } from '@chakra-ui/react';
-
 import { useRegisterForm } from '../hooks/use-register-form';
 
 export function RegisterForm() {

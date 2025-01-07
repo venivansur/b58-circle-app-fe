@@ -1,41 +1,37 @@
 import { Box, Spacer, Text, Button, Flex } from '@chakra-ui/react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { User } from '@/types/user';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/ui/avatar';
 import { api } from '@/libs/api';
+import { useFollowStore } from '@/store/follow';
+import { useAuthStore } from '@/store/auth'; 
+import { Link } from 'react-router-dom';
 
 export function Follows() {
+  const { user } = useAuthStore(); 
+  const { followers, following, setFollowers, setFollowing, toggleFollow } = useFollowStore();
   const [tabValue, setTabValue] = useState('Followers');
-  const [followers, setFollowers] = useState<User[]>([]);
-  const [following, setFollowing] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const userId = parseInt(localStorage.getItem('userId') || '0', 10);
+ 
+  const userId = user?.id;
 
   useEffect(() => {
+    if (!userId) return; 
+
     const fetchData = async () => {
-      setLoading(true);
+     
       setError(null);
+
       try {
-        const followersResponse = await api.get(`/users/${userId}/followers`);
-        const followingResponse = await api.get(`/users/${userId}/following`);
-  
-        console.log('Followers Response:', followersResponse.data);  
-        console.log('Following Response:', followingResponse.data);  
-  
-        if (followersResponse.data && followersResponse.data.length > 0) {
-          setFollowers(followersResponse.data);
-        } else {
-          setFollowers([]);
-        }
-  
-        if (followingResponse.data && followingResponse.data.length > 0) {
-          setFollowing(followingResponse.data);
-        } else {
-          setFollowing([]);
-        }
+        const [followersResponse, followingResponse] = await Promise.all([
+          api.get(`/users/${userId}/followers`),
+          api.get(`/users/${userId}/following`),
+        ]);
+
+        setFollowers(followersResponse.data || []);
+        setFollowing(followingResponse.data || []);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to fetch followers or following');
@@ -43,13 +39,59 @@ export function Follows() {
         setLoading(false);
       }
     };
-  
-    fetchData();
-  }, [userId]);
-  
 
-  const filteredUsers =
-    tabValue === 'Followers' ? followers : following;
+    fetchData();
+  }, [userId, setFollowers, setFollowing]);
+
+  const handleToggleFollow = async (targetUserId: string, isCurrentlyFollowing: boolean) => {
+   
+
+   
+    toggleFollow(targetUserId, !isCurrentlyFollowing);
+
+    if (isCurrentlyFollowing) {
+      setFollowing(following.filter((user) => user.id !== targetUserId));
+    } else {
+      const newFollowing = [...following, { id: targetUserId }];
+      setFollowing(newFollowing as any);
+    }
+
+    try {
+      const endpoint = isCurrentlyFollowing
+        ? `/users/${targetUserId}/follow`
+        : `/users/${targetUserId}/follow`; 
+
+      const response = await api.post(endpoint);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+
+      const [followersResponse, followingResponse] = await Promise.all([
+        api.get(`/users/${userId}/followers`),
+        api.get(`/users/${userId}/following`),
+      ]);
+
+      setFollowers(followersResponse.data || []);
+      setFollowing(followingResponse.data || []);
+    } catch (err: any) {
+      console.error('Error toggling follow:', err.response?.data || err.message);
+      toggleFollow(targetUserId, isCurrentlyFollowing); 
+
+      
+      if (isCurrentlyFollowing) {
+        setFollowing(following);
+      } else {
+        setFollowing(following.filter((user) => user.id !== targetUserId));
+      }
+    }
+  };
+
+  const filteredUsers = tabValue === 'Followers' ? (followers || []) : (following || []);
+
+  if (!userId) {
+    return <Text color="red.500">User not found</Text>;
+  }
 
   return (
     <Box padding={5}>
@@ -86,7 +128,6 @@ export function Follows() {
               Following
             </Tabs.Trigger>
           </Tabs.List>
-
           <Box
             position="absolute"
             bottom="-4px"
@@ -105,10 +146,9 @@ export function Follows() {
           ) : error ? (
             <Text color="red.500">{error}</Text>
           ) : (
-            filteredUsers.slice(0, 10).map((user, index) => (
+            filteredUsers.map((user) => (
               <Flex
-                key={index}
-                display="flex"
+                key={user.id}
                 alignItems="center"
                 justifyContent="space-between"
                 mb={4}
@@ -120,19 +160,29 @@ export function Follows() {
                   border="2px solid white"
                 />
                 <Box ml={3}>
-                  <Text color="white">{user.fullName}</Text>
+                  <Link to={`/profile-page/${user.id}`}>
+                    <Text
+                      color="white"
+                      fontWeight="bold"
+                      _hover={{ textDecoration: 'underline' }}
+                    >
+                      {user.fullName}
+                    </Text>
+                  </Link>
                   <Text fontSize="sm" color="gray.400">
                     @{user.username}
                   </Text>
                 </Box>
                 <Spacer />
                 <Button
-                  disabled={user.isFollowed}
-                  variant="outline"
+                  onClick={() =>
+                    handleToggleFollow(user.id, following.some((f) => f.id === user.id))
+                  }
+                  variant="subtle"
                   colorScheme="whiteAlpha"
-                  color={'white'}
+                  color="black"
                 >
-                  {user.isFollowed ? 'Followed' : 'Follow'}
+                  {following.some((f) => f.id === user.id) ? 'Following' : 'Follow'}
                 </Button>
               </Flex>
             ))
@@ -145,10 +195,9 @@ export function Follows() {
           ) : error ? (
             <Text color="red.500">{error}</Text>
           ) : (
-            filteredUsers.slice(0, 10).map((user, index) => (
+            filteredUsers.map((user) => (
               <Flex
-                key={index}
-                display="flex"
+                key={user.id}
                 alignItems="center"
                 justifyContent="space-between"
                 mb={4}
@@ -167,12 +216,14 @@ export function Follows() {
                 </Box>
                 <Spacer />
                 <Button
-                  disabled={user.isFollowed}
-                  variant="outline"
+                  onClick={() =>
+                    handleToggleFollow(user.id, following.some((f) => f.id === user.id))
+                  }
+                  variant="subtle"
                   colorScheme="whiteAlpha"
-                  color={'white'}
+                  color="black"
                 >
-                  {user.isFollowed ? 'Followed' : 'Follow'}
+                  {following.some((f) => f.id === user.id) ? 'Following' : 'Follow'}
                 </Button>
               </Flex>
             ))

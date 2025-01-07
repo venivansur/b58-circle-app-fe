@@ -1,10 +1,11 @@
-import { useLogin } from "@/services/auth";
-import { LoginForm, loginFormSchema } from "@/utils/schemas/auth/login";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2"; 
+import { useLogin } from '@/services/auth';
+import { LoginForm, loginFormSchema } from '@/utils/schemas/auth/login';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/auth';
+import Swal from 'sweetalert2';
 
 export const useLoginForm = () => {
   const {
@@ -12,26 +13,29 @@ export const useLoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginForm>({
-    mode: "onSubmit",
+    mode: 'onSubmit',
     resolver: zodResolver(loginFormSchema),
   });
+
   const { mutateAsync } = useLogin();
   const navigate = useNavigate();
+
+  const { setUser } = useAuthStore();
 
   const onSubmit = useCallback(
     async (data: LoginForm) => {
       try {
         const response = await mutateAsync(data);
-const { token, user } = response.data; 
-const userId = user.id; 
+        const { token, user } = response.data;
 
-localStorage.setItem("userId", JSON.stringify(userId));  
-localStorage.setItem("token", token); 
+        if (!token || !user) {
+          throw new Error('Invalid login response');
+        }
 
-console.log("Token dan userId berhasil disimpan:", token, userId);
+        setUser(user);
 
+        localStorage.setItem('token', token);
 
-     
         Swal.fire({
           title: 'Success',
           text: 'You have logged in successfully.',
@@ -41,14 +45,15 @@ console.log("Token dan userId berhasil disimpan:", token, userId);
           background: '#1E201E',
         });
 
-       
-        navigate("/");
-      } catch (error) {
-        console.error("Error saat login:", error);
+        navigate('/', { replace: true });
+      } catch (error: any) {
+        console.error('Error saat login:', error);
 
+        const errorMessage =
+          error.response?.data?.message || 'Login failed. Please try again.';
         Swal.fire({
           title: 'Error',
-          text: 'Login failed. Please try again.',
+          text: errorMessage,
           icon: 'error',
           confirmButtonText: 'OK',
           confirmButtonColor: '#347928',
@@ -56,7 +61,7 @@ console.log("Token dan userId berhasil disimpan:", token, userId);
         });
       }
     },
-    [mutateAsync, navigate]
+    [mutateAsync, navigate, setUser]
   );
 
   return {

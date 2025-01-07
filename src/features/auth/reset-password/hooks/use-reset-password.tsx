@@ -1,50 +1,80 @@
-import fakeUser from '@/datas/user.json';
-import { useAuthStore } from '@/store/auth';
-import { User } from '@/types/user';
-import {
-  ResetForm,
-  ResetFormSchema,
-} from '@/utils/schemas/auth/reset-password';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';  
+import Swal from 'sweetalert2'; 
+import { ResetForm, ResetFormSchema } from '@/utils/schemas/auth/reset-password';
 
 export const useResetForm = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ResetForm>({
-    mode: 'onSubmit',
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const tokenFromUrl = new URLSearchParams(window.location.search).get('token');
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+      console.log("Token from URL:", tokenFromUrl); 
+    } else {
+      console.log("Token tidak ditemukan di URL.");
+    }
+  }, []);
+
+  const { register, handleSubmit, formState: { errors } } = useForm<ResetForm>({
     resolver: zodResolver(ResetFormSchema),
   });
 
-  const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
   const onSubmit = useCallback(
-    (data: ResetForm) => {
-      const user = fakeUser.find(
-        (user) => user.password === data.resetPassword
-      ) as User;
+    async (data: ResetForm) => {
+      if (!token) {
+        Swal.fire({
+          title: 'Error',
+          text: 'Token tidak ditemukan.',
+          icon: 'error',
+        });
+        return;
+      }
 
-      if (user) {
-        user.password = data.resetPassword;
-        setUser(user);
+      try {
+        const response = await axios.post('http://localhost:4000/api/v1/auth/reset-password', {
+          token,
+          password: data.password,
+        });
 
-        navigate('/login');
-      } else {
-        alert('User tidak ditemukan atau password salah!');
+        if (response.status === 200) {
+          Swal.fire({
+            title: 'Success',
+            text: 'Password berhasil direset. Silakan login dengan password baru Anda.',
+            icon: 'success',
+            background: '#1E201E',
+          }).then(() => {
+            navigate('/login');
+          });
+        } else {
+          console.log(response.data);
+          Swal.fire({
+            title: 'Error',
+            text: response.data.message || 'Gagal mereset password.',
+            icon: 'error',
+          });
+        }
+      } catch (err: any) {
+        console.error(err); 
+        Swal.fire({
+          title: 'Error',
+          text: err.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.',
+          icon: 'error',
+        });
       }
     },
-    [navigate, setUser]
+    [token, navigate]
   );
 
   return {
     register,
-    onSubmit,
     handleSubmit,
+    onSubmit,
     errors,
   };
 };

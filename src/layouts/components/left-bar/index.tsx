@@ -62,8 +62,8 @@ export function LeftBar() {
       if (result.isConfirmed) {
         clearUser();
         localStorage.removeItem("token");
-        localStorage.removeItem("userId")
-        localStorage.removeItem("userProfile");
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("follow-storage");
         navigate('/login');
       }
     });

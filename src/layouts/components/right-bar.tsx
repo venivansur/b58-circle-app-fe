@@ -17,6 +17,7 @@ export function RightBar() {
     >
      
       {location.pathname !== '/profile' && <MyProfile />}
+      
       <SuggestedUser />
       <Credit />
     </Box>

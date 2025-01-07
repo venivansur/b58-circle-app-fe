@@ -1,10 +1,10 @@
 import * as Tabs from '@radix-ui/react-tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
+  IconButton,
   Text,
   Stack,
-  IconButton,
   Button,
   HStack,
   Separator,
@@ -12,45 +12,63 @@ import {
   Grid,
   GridItem,
 } from '@chakra-ui/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaHeart, FaComment } from 'react-icons/fa';
 import { Avatar } from '@/components/ui/avatar';
 import { useLikeStore } from '@/store/like';
-import { useFindThreads } from '@/services/thread';
-import { useAuthStore } from '@/store/auth';
-import { timeAgo } from '@/utils/timeAgo';
-export function Profile() {
-  const { user } = useAuthStore();
-  const userId = user?.id; 
+import { api } from '@/libs/api'; 
 
-  console.log('User ID:', userId);
-
-  const { data: threadsData, isLoading, error } = useFindThreads(userId);
-  const [tabValue, setTabValue] = useState('All Post');
+export function ProfilePage() {
+  const { userId } = useParams<{ userId: string }>(); 
   const navigate = useNavigate();
+
+
+  const [, setUserProfile] = useState<any>(null);
+  const [threads, setThreads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState('All Post');
 
   const { toggleLike, likes } = useLikeStore();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+       
+
+       
+        const profileResponse = await api.get(`/users/${userId}`);
+        const threadsResponse = await api.get(`/threads?userId=${userId}`);
+
+      
+        setUserProfile(profileResponse.data);
+        setThreads(threadsResponse.data.threads);
+      } catch (err) {
+        setError('Error fetching profile data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
+
+  if (loading) {
+    return <Text color="white">Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text color="red.500">Error fetching profile data</Text>;
+  }
+
   const handleLike = async (threadId: number) => {
-    console.log('Toggling like for thread ID:', threadId);
     try {
       await toggleLike(threadId);
     } catch (error) {
       console.error('Error toggling like:', error);
     }
   };
-
-  if (isLoading) {
-    return <Text color="white">Loading threads...</Text>;
-  }
-
-  if (error) {
-    return <Text color="red.500">Error fetching threads</Text>;
-  }
-
-  
-  const threads = Array.isArray(threadsData) ? threadsData : [];
- 
 
   return (
     <Box>
@@ -113,7 +131,7 @@ export function Profile() {
                       {thread.user.fullName}
                     </Text>
                     <Text color="gray.500" fontSize="sm">
-                    {timeAgo(thread.createdAt)}
+                      {new Date(thread.createdAt).toLocaleString()}
                     </Text>
                   </Stack>
                 </HStack>

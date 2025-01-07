@@ -6,6 +6,7 @@ import { ForgotPasswordRoute } from './forgot-password';
 import { HomeRoute } from './home';
 import { LoginRoute } from './login';
 import { ProfileRoute } from './profile';
+import { ProfilePageRoute } from './profile-page';
 import {ProtectedRoute} from './protect-route';
 import { RegisterRoute } from './register';
 import { ResetPasswordRoute } from './reset-password';
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
       {
         path: '/profile',
         element: <ProfileRoute />,
+      },
+      {
+        path: "/profile-page/:userId",
+        element: <ProfilePageRoute />,
       },
       {
         path: '/follows',

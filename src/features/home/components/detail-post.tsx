@@ -1,214 +1,202 @@
-import { Box, Text, Image, HStack, Button, Center, Input, Stack } from '@chakra-ui/react';
-import { FaHeart, FaComment } from 'react-icons/fa';
+import {
+  Box,
+  Text,
+  Image,
+  HStack,
+  Button,
+  Center,
+  Input,
+  Stack,
+  Spinner,
+} from '@chakra-ui/react';
+import { FaHeart, FaComment, FaTrash } from 'react-icons/fa';
 import { Avatar } from '@/components/ui/avatar';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { GreenButton } from '@/components/ui/green-button';
 import { api } from '@/libs/api';
 import { useParams } from 'react-router-dom';
 import { GalleryAdd } from '@/assets';
-import { Thread, Reply } from '@/types/thread';
 import { timeAgo } from '@/utils/timeAgo';
-import { useLikeStore } from '@/store/like'; // Impor store untuk like
+import { useLikeStore } from '@/store/like';
+import { useAuthStore } from '@/store/auth';
+import { Thread, Reply } from '@/types/thread';
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function PostWithoutImageDetail() {
   const { id } = useParams();
   const inputFileRef = useRef<HTMLInputElement>(null);
 
-  const [usersData, setUsersData] = useState<any[]>([]);
+  const { user: loggedInUser } = useAuthStore();
   const [thread, setThread] = useState<Thread | null>(null);
-  const [threadsUser, setThreadsUser] = useState<any>(null);
+
   const [replies, setReplies] = useState<Reply[]>([]);
   const [newReply, setNewReply] = useState('');
   const [newReplyImage, setNewReplyImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isReplying, setIsReplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
- 
   const { likes, toggleLike } = useLikeStore();
-  const likesCount = likes[parseInt(id!)]
 
-  
-  const fetchData = useCallback(() => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
+    try {
+      const threadResponse = await api.get(`/threads/${id}`);
+      setThread(threadResponse.data.thread);
 
-    const fetch = async () => {
-      try {
-        const storedUserId = localStorage.getItem('userId');
-        const userId = storedUserId ? parseInt(storedUserId) : null;
-        console.log('User Response:', userId);
-
-        if (!userId) {
-          setError('User ID not found in localStorage.');
-          return;
-        }
-
-        const userResponse = await api.get(`/users`);
-        const usersData = userResponse.data;
-        setUsersData(usersData);
-
-        const threadResponse = await api.get(`/threads/${id}`);
-        const threadData = threadResponse.data.thread;
-        console.log('Thread Data:', threadData);
-
-        if (!threadData || !threadData.userId) {
-          setError('Thread or userId is missing.');
-          return;
-        }
-
-        setThread(threadData);
-
-        const userWhoCreatedThread = usersData.find(
-          (user: any) => user.id === threadData.userId
-        );
-        if (userWhoCreatedThread) {
-          setThreadsUser(userWhoCreatedThread);
-        } else {
-          setError('User not found for this thread.');
-        }
-
-        const repliesResponse = await api.get(`/threads/${id}/replies`);
-        setReplies(repliesResponse.data.replies || []);
-        console.log('Replies Data:', repliesResponse.data.replies);
-
-      } catch (err) {
-        setError('Failed to fetch data.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetch();
+      const repliesResponse = await api.get(`/threads/${id}/replies`);
+      setReplies(repliesResponse.data.replies || []);
+    } catch (err) {
+      setError('Failed to fetch data.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
- 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setNewReplyImage(objectUrl);
+    }
+  };
+
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!newReply.trim() && !newReplyImage) return;
 
+    setIsReplying(true);
     try {
-      const storedUserId = localStorage.getItem('userId');
-      const userId = storedUserId ? parseInt(storedUserId) : null;
-      const loggedInUser = usersData.find((user: any) => user.id === userId);
+      const formData = new FormData();
+      formData.append('content', newReply);
 
-      if (!loggedInUser) {
-        setError('Logged-in user not found.');
-        return;
-      }
+      const file = inputFileRef.current?.files?.[0];
+      if (file) formData.append('file', file);
 
-      const newReplyData = {
-        content: newReply,
-        userId: loggedInUser.id,
-        user: loggedInUser.fullName,
-        fileUrl: newReplyImage,
-      };
-
-      const response = await api.post(`/threads/${id}/replies`, newReplyData);
-      const addedReply = response.data.reply;
-      console.log("Added Reply:", addedReply);
-
-      setReplies((prevReplies) => [...prevReplies, addedReply]);
+      await api.post(`/threads/${id}/replies`, formData);
       setNewReply('');
       setNewReplyImage(null);
-
-      if (inputFileRef.current) inputFileRef.current.value = '';
+      fetchData();
     } catch (err) {
       setError('Failed to add reply.');
       console.error(err);
+    } finally {
+      setIsReplying(false);
     }
   };
 
- 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageUrl = event.target?.result as string;
-        setNewReplyImage(imageUrl);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setError('Invalid file type. Please upload an image.');
-    }
+  const handleDeleteReply = async (replyId: string) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/threads/${id}/replies/${replyId}`);
+          setReplies((prevReplies) =>
+            prevReplies.filter((reply) => reply.id !== replyId)
+          );
+          Swal.fire('Deleted!', 'Your reply has been deleted.', 'success');
+        } catch (err) {
+          console.error('Failed to delete reply:', err);
+          setError('Failed to delete reply.');
+          Swal.fire('Error!', 'Failed to delete the reply.', 'error');
+        }
+      }
+    });
   };
 
-  if (loading) {
+  if (loading || error) {
     return (
       <Center mt={20}>
-        <Text color="gray.500" fontSize="xl">
-          Loading...
+        <Text color={loading ? 'gray.500' : 'red.500'} fontSize="xl">
+          {loading ? 'Loading...' : error}
         </Text>
       </Center>
     );
   }
 
-  if (error) {
-    return (
-      <Center mt={20}>
-        <Text color="red.500" fontSize="xl">
-          {error}
-        </Text>
-      </Center>
-    );
-  }
-
-  if (!thread || !threadsUser) {
+  if (!thread) {
     return (
       <Center mt={20}>
         <Text color="red.500" fontSize="xl">
-          Post or User not found!
+          Thread not found!
         </Text>
       </Center>
     );
   }
 
-  const user = thread.user || {};
-  const repliesCount = thread.replies?.length || 0;
-  const threadContent = thread.content || 'No content';
+  const repliesCount = replies.length;
 
   return (
     <Box p={5}>
-      <Box key={thread.id} mb={5} padding={5} pb={6}>
+      <Box mb={5} p={5} pb={6}>
         <HStack gap={4}>
-          {user.fullName && (
-            <Avatar name={user.fullName} src={user.profilePicture || ''} />
+          {thread.user?.fullName && (
+            <Avatar
+              name={thread.user.fullName}
+              src={thread.user.profilePicture || ''}
+            />
           )}
           <Stack>
             <Text color="white" fontWeight="bold">
-              {user.fullName || 'Unknown User'}
+              {thread.user?.fullName || 'Unknown User'}
             </Text>
             <Text color="gray.500" fontSize="sm">
               {timeAgo(thread.createdAt)}
             </Text>
           </Stack>
         </HStack>
-
-        <Text color="white" mt={2}>
-          {threadContent}
+        <Text color="white" mt={2} mb={2}>
+          {thread.content || 'No content'}
         </Text>
+        {thread.fileUrl && (
+          <Link to={`/post-image/${thread.id}`}>
+            <Image
+              src={thread.fileUrl}
+              alt={`Image posted by ${thread.user.username}`}
+              borderRadius="md"
+              width="100%"
+              height={'430px'}
+              objectFit="cover"
+              cursor="pointer"
+            />
+          </Link>
+        )}
 
         <HStack mt={4} gap={8}>
           <HStack gap={1}>
             <Button
-              variant="solid"
-              color={likesCount > 0 ? 'red' : 'white'}
+              variant="plain"
+              color={likes[thread.id] > 0 ? 'red' : 'white'}
               size="sm"
-              onClick={() => toggleLike(thread.id)}
+              onClick={() => {
+                if (loggedInUser) {
+                  toggleLike(thread.id);
+                } else {
+                  alert('You need to log in to like posts.');
+                }
+              }}
             >
               <FaHeart />
-              {likesCount}
+              {likes[thread.id] || 0}
             </Button>
 
-            <Button variant="solid" size="sm">
+            <Button variant="plain" color={'white'} size="sm">
               <FaComment />
-              {repliesCount} Replies
+              {repliesCount}
             </Button>
           </HStack>
         </HStack>
@@ -237,8 +225,12 @@ export default function PostWithoutImageDetail() {
           >
             <Image src={GalleryAdd} w="24px" />
           </Button>
-          <GreenButton mt={2} onClick={handleCommentSubmit}>
-            Reply
+          <GreenButton
+            mt={2}
+            onClick={handleCommentSubmit}
+            disabled={isReplying}
+          >
+            {isReplying ? <Spinner size="sm" color="white" /> : 'Reply'}
           </GreenButton>
         </HStack>
 
@@ -249,7 +241,7 @@ export default function PostWithoutImageDetail() {
             </Text>
             <Image
               src={newReplyImage}
-              alt="Comment Preview"
+              alt="Preview image"
               boxSize="100px"
               objectFit="cover"
               borderRadius="md"
@@ -257,41 +249,54 @@ export default function PostWithoutImageDetail() {
             />
           </Box>
         )}
+      </Box>
 
-        <Box mt={4}>
-          {replies && replies.length > 0 ? (
-            replies.map((reply) => {
-              const fullName = reply?.user?.fullName 
-              const userProfilePicture = reply?.user?.profilePicture 
-              return (
-                <Box key={reply?.id} mt={4}>
-                  <HStack align="start">
-                    <Avatar name={fullName} src={userProfilePicture} />
-                    <Stack>
-                      <Text color="white" fontWeight="bold">
-                        {fullName}
-                      </Text>
-                      <Text color="gray.300">{reply?.content }</Text>
-                      {reply?.fileUrl && (
-                        <Image
-                          src={reply?.fileUrl}
-                          alt="Reply image"
-                          borderRadius="md"
-                          objectFit="cover"
-                          width="100%"
-                          maxW="200px"
-                          mt={2}
-                        />
+      <Box mt={6}>
+        {replies.length > 0 ? (
+          replies.map((reply) => (
+            <Box display={'flex'} key={reply.id} mt={4} gap={'4'}>
+              <Avatar
+                name={reply.user?.fullName || 'Unknown'}
+                src={reply.user?.profilePicture || ''}
+              />
+              <HStack>
+                <HStack gap={0}>
+                  <Stack>
+                    <Text color="white" fontWeight="bold">
+                      {reply.user?.fullName || 'Unknown User'}
+                      {(reply.user.id === loggedInUser?.id ||
+                        thread.user.id === loggedInUser?.id) && (
+                        <Button
+                          size="xs"
+                          marginLeft={'450px'}
+                          colorScheme="red"
+                          onClick={() => handleDeleteReply(reply.id)}
+                        >
+                          <FaTrash />
+                        </Button>
                       )}
-                    </Stack>
-                  </HStack>
-                </Box>
-              );
-            })
-          ) : (
-            <Text color="gray.500">No replies yet.</Text>
-          )}
-        </Box>
+                    </Text>
+
+                    <Text color="gray.300">{reply.content}</Text>
+                    {reply.fileUrl && (
+                      <Image
+                        src={reply.fileUrl}
+                        alt={`Image from ${reply.user?.fullName}`}
+                        borderRadius="md"
+                        objectFit="cover"
+                        width="100%"
+                        maxW="200px"
+                        mt={2}
+                      />
+                    )}
+                  </Stack>
+                </HStack>
+              </HStack>
+            </Box>
+          ))
+        ) : (
+          <Text color="gray.500">No replies yet.</Text>
+        )}
       </Box>
     </Box>
   );

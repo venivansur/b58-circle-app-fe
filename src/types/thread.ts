@@ -2,6 +2,7 @@ export interface User {
   id: string;
   fullName: string;
   profilePicture: string;
+  username:string;
 }
 
 export interface Reply {
