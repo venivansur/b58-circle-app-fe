@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import {
   Box,
   Text,
@@ -32,7 +32,7 @@ import { GalleryAdd } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 export function ListPost() {
   const fileInputRef = useRef<HTMLInputElement | null>(null); 
-  const { likes, toggleLike } = useLikeStore();
+  const { likes, initializeLikes, toggleLike } = useLikeStore();
   const queryClient = useQueryClient();
   const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [editedContent, setEditedContent] = useState('');
@@ -66,6 +66,15 @@ export function ListPost() {
     },
   });
 
+  useEffect(() => {
+    if (threads) {
+   
+      initializeLikes(threads.map((thread) => ({
+        id: thread.id,
+        likesCount: thread.likesCount || 0,
+      })));
+    }
+  }, [threads, initializeLikes]);
 
 
   const editThreadMutation = useMutation({

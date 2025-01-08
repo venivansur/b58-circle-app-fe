@@ -44,7 +44,7 @@ export default function PostWithImageDetail() {
   const [isReplying, setIsReplying] = useState(false); 
   const [error, setError] = useState<string | null>(null); 
   const { open, onOpen, onClose } = useDisclosure();
-  const { likes, toggleLike } = useLikeStore(); 
+  const { likes,  toggleLike } = useLikeStore();
 
    
     const fetchData = useCallback(async () => {
@@ -75,6 +75,8 @@ export default function PostWithImageDetail() {
       setNewReplyImage(objectUrl);
     }
   };
+
+ 
 
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
