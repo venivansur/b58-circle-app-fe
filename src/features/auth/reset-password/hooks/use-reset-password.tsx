@@ -37,7 +37,7 @@ export const useResetForm = () => {
       }
 
       try {
-        const response = await axios.post('b58-circle-app-be-venivansuryas-projects.vercel.app/api/v1/auth/reset-password', {
+        const response = await axios.post('/auth/reset-password', {
           token,
           password: data.password,
         });
