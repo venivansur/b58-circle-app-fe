@@ -232,15 +232,15 @@ export function ListPost() {
 
           <HStack mt={4} gap={8}>
             <HStack gap={1}>
-              <Button
-                variant="plain"
-                color={likes[thread.id] > 0 ? 'red' : 'white'}
-                size="sm"
-                onClick={() => toggleLike(thread.id)}
-              >
-                <FaHeart />
-                {likes[thread.id] ?? thread._count?.likes ?? 0}
-              </Button>
+            <Button
+  variant="plain"
+  color={likes[thread.id] ? 'red' : 'white'} // Warna berdasarkan status like
+  size="sm"
+  onClick={() => toggleLike(thread.id)} // Fungsi toggle
+>
+  <FaHeart />
+  {likes[thread.id] ? thread.likesCount + 1 : thread.likesCount} {/* Update UI */}
+</Button>
               <Link to={`/post/${thread.id}`}>
                 <Button variant="plain" color={'white'} size="sm">
                   <FaComment />
