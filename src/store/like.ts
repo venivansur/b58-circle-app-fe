@@ -25,10 +25,10 @@ export const useLikeStore = create<LikeStore>((set, get) => {
       try {
         const response = await api.get('/threads/likes');
         const backendLikes = response.data.likes || {};
-
-        // Kombinasikan data backend dan localStorage
         const savedLikes = getInitialLikes();
-        const combinedLikes = { ...backendLikes, ...savedLikes };
+
+        // Gabungkan data likes backend dengan yang ada di localStorage
+        const combinedLikes = { ...savedLikes, ...backendLikes };
 
         localStorage.setItem('likes', JSON.stringify(combinedLikes));
         set({ likes: combinedLikes });
@@ -40,30 +40,29 @@ export const useLikeStore = create<LikeStore>((set, get) => {
     toggleLike: async (threadId) => {
       try {
         const currentLikeStatus = get().likes[threadId] || 0;
-
+    
         const response = await api.post(`/threads/${threadId}/like`, {
           likeStatus: currentLikeStatus === 0 ? 1 : 0,
         });
-
+    
         const updatedLikeStatus = response.data.thread?._count?.likes;
-
+    
         if (updatedLikeStatus === undefined) {
           throw new Error('Tidak ada data status like dalam respons');
         }
-
-        // Perbarui state dan localStorage
+    
         set((state) => {
           const updatedLikes = {
             ...state.likes,
             [threadId]: updatedLikeStatus,
           };
-
+    
           localStorage.setItem('likes', JSON.stringify(updatedLikes));
           return { likes: updatedLikes };
         });
       } catch (error) {
         console.error('Error toggling like:', error);
       }
-    },
+    }
   };
 });
