@@ -52,18 +52,18 @@ export function ListPost() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
-    queryKey: ['threads'],
-    queryFn: async () => {
-      const response = await api.get('/threads');
-      return response.data.threads.map((thread: any) => ({
-        ...thread,
-        likesCount: thread._count?.likes || 0, 
-        isLikedByUser: thread.isLikedByUser || false,
-      }));
-    },
-  });
-  
+const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
+  queryKey: ['threads'],
+  queryFn: async () => {
+    const response = await api.get('/threads');
+    return response.data.threads.map((thread: any) => ({
+      ...thread,
+      likesCount: thread._count?.likes || 0, 
+      isLikedByUser: thread.isLikedByUser || false, 
+    }));
+  },
+});
+
 
   const editThreadMutation = useMutation({
     mutationFn: async ({
@@ -232,15 +232,15 @@ export function ListPost() {
 
           <HStack mt={4} gap={8}>
             <HStack gap={1}>
-            <Button
-  variant="plain"
-  color={likes[thread.id] ? 'red' : 'white'} // Warna berdasarkan status like
-  size="sm"
-  onClick={() => toggleLike(thread.id)} // Fungsi toggle
->
-  <FaHeart />
-  {likes[thread.id] ? thread.likesCount + 1 : thread.likesCount} {/* Update UI */}
-</Button>
+              <Button
+                variant="plain"
+                color={thread.isLikedByUser ? 'red' : 'white'}
+                size="sm"
+                onClick={() => toggleLike(thread.id)}
+              >
+                <FaHeart />
+                {likes[thread.id] ?? thread._count?.likes ?? 0}
+              </Button>
               <Link to={`/post/${thread.id}`}>
                 <Button variant="plain" color={'white'} size="sm">
                   <FaComment />
