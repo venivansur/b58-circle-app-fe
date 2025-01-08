@@ -1,4 +1,4 @@
-import { useState, useRef,useEffect } from 'react';
+import { useState, useRef, } from 'react';
 import {
   Box,
   Text,
@@ -32,7 +32,7 @@ import { GalleryAdd } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 export function ListPost() {
   const fileInputRef = useRef<HTMLInputElement | null>(null); 
-  const { likes, initializeLikes, toggleLike } = useLikeStore();
+  const { likes, toggleLike } = useLikeStore();
   const queryClient = useQueryClient();
   const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [editedContent, setEditedContent] = useState('');
@@ -52,30 +52,20 @@ export function ListPost() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const {
-    data: threads,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Thread[]>({
+  const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
     queryKey: ['threads'],
     queryFn: async () => {
       const response = await api.get('/threads');
-    
-      return response.data.threads;
+      
+     
+      return response.data.threads.map((thread: any) => ({
+        ...thread,
+        likesCount: thread._count?.likes
+      }));
     },
   });
-
-  useEffect(() => {
-    if (threads) {
-   
-      initializeLikes(threads.map((thread) => ({
-        id: thread.id,
-        likesCount: thread.likesCount || 0,
-      })));
-    }
-  }, [threads, initializeLikes]);
-
+  
+  
 
   const editThreadMutation = useMutation({
     mutationFn: async ({
@@ -220,15 +210,15 @@ export function ListPost() {
 
     <HStack mt={4} gap={8}>
       <HStack gap={1}>
-        <Button
-          variant="plain"
-          color={likes[thread.id] > 0 ? 'red' : 'white'}
-          size="sm"
-          onClick={() => toggleLike(thread.id)}
-        >
-          <FaHeart />
-          {likes[thread.id] || 0} {/* Menampilkan jumlah like yang benar */}
-        </Button>
+      <Button
+  variant="plain"
+  color={likes[thread.id] > 0 ? 'red' : 'white'}
+  size="sm"
+  onClick={() => toggleLike(thread.id)}
+>
+  <FaHeart />
+  {likes[thread.id] ?? thread._count?.likes ?? 0} 
+</Button>
         <Link to={`/post/${thread.id}`}>
           <Button variant="plain" color={'white'} size="sm">
             <FaComment />

@@ -15,14 +15,14 @@ export interface Reply {
 export interface Thread {
   id: number;
   content: string;
-  fileUrl: string
+  fileUrl: string;
   createdAt: string;
-  _count: {
+  _count?: {
     replies: number;
     likes: number;
   };
   user: User;
   replies: Reply[];
   isLikedByUser?: boolean; // Properti baru untuk status "like"
-  likesCount: number
+  likesCount: number; // Pastikan likesCount ada di sini
 }
