@@ -188,94 +188,60 @@ export function ListPost() {
 
   return (
     <Box>
-      {threads.map((thread) => (
-        <Box
-          key={thread.id}
-          mb={5}
-          p={5}
-          borderBottomWidth="1px"
-          borderBottomColor={'gray.50'}
+     {threads.map((thread) => (
+  <Box key={thread.id} mb={5} p={5} borderBottomWidth="1px" borderBottomColor={'gray.50'}>
+    <HStack gap={4}>
+      <Avatar name={thread.user?.fullName || 'Unknown'} src={thread.user?.profilePicture} />
+      <HStack>
+        <Link to={`/profile-page/${thread.user?.id}`}>
+          <Text color="white" fontWeight="bold">{thread.user?.fullName}</Text>
+        </Link>
+        <Text color="gray.500" fontSize="medium">@{thread.user?.username}</Text>
+      </HStack>
+      <Text color="gray.500" fontSize="sm">• {timeAgo(thread.createdAt)}</Text>
+    </HStack>
+
+    <Text color={'white'} mt={2}>{thread.content}</Text>
+
+    {thread.fileUrl && (
+      <Link to={`/post-image/${thread.id}`}>
+        <Image src={thread.fileUrl} alt={`Post by ${thread.user?.fullName}`} borderRadius="md" mt={4} cursor="pointer" _hover={{ opacity: 0.8 }} />
+      </Link>
+    )}
+
+    <HStack mt={4} gap={8}>
+      <HStack gap={1}>
+        <Button
+          variant="plain"
+          color={likes[thread.id] > 0 ? 'red' : 'white'}
+          size="sm"
+          onClick={() => toggleLike(thread.id)}
         >
-          <HStack gap={4}>
-            <Avatar
-              name={thread.user?.fullName || 'Unknown'}
-              src={thread.user?.profilePicture}
-            />
+          <FaHeart />
+          {likes[thread.id] || 0} {/* Menampilkan jumlah like yang benar */}
+        </Button>
+        <Link to={`/post/${thread.id}`}>
+          <Button variant="plain" color={'white'} size="sm">
+            <FaComment />
+            {thread.replies?.length || 0}
+          </Button>
+        </Link>
+      </HStack>
 
-            <HStack>
-              <Link to={`/profile-page/${thread.user?.id}`}>
-                <Text color="white" fontWeight="bold">
-                  {thread.user?.fullName}
-                </Text>
-              </Link>
-              <Text color="gray.500" fontSize="medium">
-                @{thread.user?.username}
-              </Text>
-            </HStack>
-            <Text color="gray.500" fontSize="sm">
-              • {timeAgo(thread.createdAt)}
-            </Text>
-          </HStack>
+      {userId === thread.user?.id && (
+        <HStack gap={2} ml="auto">
+          <Button size="sm" bg="green.500" color="white" onClick={() => handleEdit(thread)}>
+            <FaEdit />
+          </Button>
+          <Button size="sm" color="white" onClick={() => handleDelete(thread)}>
+            <FaTrash />
+          </Button>
+        </HStack>
+      )}
+    </HStack>
+  </Box>
+))}
 
-          <Text color={'white'} mt={2}>
-            {thread.content}
-          </Text>
-
-          {thread.fileUrl && (
-            <Link to={`/post-image/${thread.id}`}>
-              <Image
-                src={thread.fileUrl}
-                alt={`Post by ${thread.user?.fullName}`}
-                borderRadius="md"
-                mt={4}
-                cursor="pointer"
-                _hover={{ opacity: 0.8 }}
-              />
-            </Link>
-          )}
-
-          <HStack mt={4} gap={8}>
-            <HStack gap={1}>
-              <Button
-                variant="plain"
-                color={likes[thread.id] > 0 ? 'red' : 'white'}
-                size="sm"
-                onClick={() => toggleLike(thread.id)}
-              >
-                <FaHeart />
-                {likes[thread.id] || 0}
-              </Button>
-
-              <Link to={`/post/${thread.id}`}>
-                <Button variant="plain" color={'white'} size="sm">
-                  <FaComment />
-                  {thread.replies?.length || 0}
-                </Button>
-              </Link>
-            </HStack>
-
-            {userId === thread.user?.id && (
-              <HStack gap={2} ml="auto">
-                <Button
-                  size="sm"
-                  bg="green.500"
-                  color="white"
-                  onClick={() => handleEdit(thread)}
-                >
-                  <FaEdit />
-                </Button>
-                <Button
-                  size="sm"
-                  color="white"
-                  onClick={() => handleDelete(thread)}
-                >
-                  <FaTrash />
-                </Button>
-              </HStack>
-            )}
-          </HStack>
-        </Box>
-      ))}
       {currentThread && (
         <DialogRoot open={isEditOpen} onOpenChange={onEditClose}>
           <DialogContent color={'white'} backgroundColor={'brand.background'}>
