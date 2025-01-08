@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { api } from '@/libs/api';
-import { toast } from 'react-toastify';
 
 interface LikeStore {
   likes: Record<number, number>;
@@ -13,7 +12,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
 
   initializeLikes: (threads) => {
     const likesMap = threads.reduce((acc, thread) => {
-      acc[thread.id] = thread.likesCount || 0; // Gunakan jumlah like dari API
+      acc[thread.id] = thread.likesCount || 0; // Ambil data likes dari API
       return acc;
     }, {} as Record<number, number>);
     set({ likes: likesMap });
@@ -37,12 +36,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
           [threadId]: updatedLikeStatus,
         },
       }));
-
-      toast.success(
-        updatedLikeStatus > 0 ? 'Like berhasil!' : 'Like dihapus!'
-      );
     } catch (error) {
-      toast.error('Gagal mengubah like.');
       console.error('Error toggling like:', error);
     }
   },
