@@ -21,49 +21,55 @@ export const useLikeStore = create<LikeStore>((set, get) => {
   return {
     likes: getInitialLikes(),
 
-    loadLikes: async () => {
-      try {
-        const response = await api.get('/threads/likes');
-        const backendLikes = response.data.likes || {};
-        const savedLikes = getInitialLikes();
+  // Menambahkan loadLikes untuk memastikan data backend dan localStorage tergabung dengan benar
+loadLikes: async () => {
+  try {
+    const response = await api.get('/threads/likes');
+    const backendLikes = response.data.likes || {};
 
-        // Gabungkan data likes backend dengan yang ada di localStorage
-        const combinedLikes = { ...savedLikes, ...backendLikes };
+    const savedLikes = getInitialLikes();
+    const combinedLikes = { ...backendLikes, ...savedLikes };
 
-        localStorage.setItem('likes', JSON.stringify(combinedLikes));
-        set({ likes: combinedLikes });
-      } catch (error) {
-        console.error('Error loading likes:', error);
-      }
-    },
-    toggleLike: async (threadId) => {
-      try {
-        const currentLikeStatus = get().likes[threadId] || 0;
-        const newLikeStatus = currentLikeStatus === 0 ? 1 : 0;
-    
-        const response = await api.post(`/threads/${threadId}/like`, {
-          likeStatus: newLikeStatus,
-        });
-    
-        const updatedLikeStatus = response.data.thread?._count?.likes;
-    
-        if (updatedLikeStatus === undefined) {
-          throw new Error('Tidak ada data status like dalam respons');
-        }
-    
-        set((state) => {
-          const updatedLikes = {
-            ...state.likes,
-            [threadId]: newLikeStatus, // Update status like sesuai yang diinginkan
-          };
-    
-          localStorage.setItem('likes', JSON.stringify(updatedLikes));
-          return { likes: updatedLikes };
-        });
-      } catch (error) {
-        console.error('Error toggling like:', error);
-      }
+    // Simpan data gabungan di localStorage dan state
+    localStorage.setItem('likes', JSON.stringify(combinedLikes));
+    set({ likes: combinedLikes });
+  } catch (error) {
+    console.error('Error loading likes:', error);
+  }
+},
+
+// Memperbarui toggleLike untuk mempertahankan status like yang sudah ada dari pengguna lain
+toggleLike: async (threadId) => {
+  try {
+    const currentLikeStatus = get().likes[threadId] || 0;
+    const newLikeStatus = currentLikeStatus === 0 ? 1 : 0;
+
+    const response = await api.post(`/threads/${threadId}/like`, {
+      likeStatus: newLikeStatus,
+    });
+
+    const updatedLikeStatus = response.data.thread?._count?.likes;
+
+    if (updatedLikeStatus === undefined) {
+      throw new Error('Tidak ada data status like dalam respons');
     }
+
+    // Gabungkan data likes dari backend dan localStorage
+    set((state) => {
+      const updatedLikes = {
+        ...state.likes,
+        [threadId]: newLikeStatus,  // Perbarui like status sesuai dengan like baru
+      };
+
+      // Perbarui localStorage dengan data terbaru
+      localStorage.setItem('likes', JSON.stringify(updatedLikes));
+      return { likes: updatedLikes };
+    });
+  } catch (error) {
+    console.error('Error toggling like:', error);
+  }
+}
+
     
   };
 });

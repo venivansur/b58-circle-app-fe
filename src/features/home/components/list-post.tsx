@@ -60,8 +60,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
     const response = await api.get('/threads');
     return response.data.threads.map((thread: any) => ({
       ...thread,
-      likesCount: thread._count?.likes || 0, // Jumlah like
-      isLikedByUser: thread.isLikedByUser || false, // Status liked oleh user
+    
     }));
   },
 });
