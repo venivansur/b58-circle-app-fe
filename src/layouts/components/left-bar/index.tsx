@@ -64,6 +64,7 @@ export function LeftBar() {
         localStorage.removeItem("token");
         localStorage.removeItem("auth-storage");
         localStorage.removeItem("follow-storage");
+        localStorage.removeItem("likes");
         navigate('/login');
       }
     });

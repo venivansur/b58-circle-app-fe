@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User } from '@/types/user'; // Tipe User
-
+import { User } from '@/types/user';
 interface FollowState {
   followers: User[]; 
   following: User[]; 

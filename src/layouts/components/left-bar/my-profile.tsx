@@ -114,8 +114,8 @@ export function MyProfile({ selectedUserId }: { selectedUserId?: string }) {
               
               profilePicture: profileData.profilePicture,
               profile: {
-                ...user.profile, // Pastikan data profil sebelumnya tetap ada
-                bio: profileData.bio, // Masukkan bio ke dalam profile
+                ...user.profile, 
+                bio: profileData.bio,
             }});
           }
     
