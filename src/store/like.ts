@@ -36,13 +36,13 @@ export const useLikeStore = create<LikeStore>((set, get) => {
         console.error('Error loading likes:', error);
       }
     },
-
     toggleLike: async (threadId) => {
       try {
         const currentLikeStatus = get().likes[threadId] || 0;
+        const newLikeStatus = currentLikeStatus === 0 ? 1 : 0;
     
         const response = await api.post(`/threads/${threadId}/like`, {
-          likeStatus: currentLikeStatus === 0 ? 1 : 0,
+          likeStatus: newLikeStatus,
         });
     
         const updatedLikeStatus = response.data.thread?._count?.likes;
@@ -54,7 +54,7 @@ export const useLikeStore = create<LikeStore>((set, get) => {
         set((state) => {
           const updatedLikes = {
             ...state.likes,
-            [threadId]: updatedLikeStatus,
+            [threadId]: newLikeStatus, // Update status like sesuai yang diinginkan
           };
     
           localStorage.setItem('likes', JSON.stringify(updatedLikes));
@@ -64,5 +64,6 @@ export const useLikeStore = create<LikeStore>((set, get) => {
         console.error('Error toggling like:', error);
       }
     }
+    
   };
 });
