@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';  
+import { api } from "@/libs/api";
 import Swal from 'sweetalert2'; 
 import { ResetForm, ResetFormSchema } from '@/utils/schemas/auth/reset-password';
 
@@ -37,7 +37,7 @@ export const useResetForm = () => {
       }
 
       try {
-        const response = await axios.post('/auth/reset-password', {
+        const response = await api.post('/auth/reset-password', {
           token,
           password: data.password,
         });
