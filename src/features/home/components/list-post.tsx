@@ -58,8 +58,8 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
     const response = await api.get('/threads');
     return response.data.threads.map((thread: any) => ({
       ...thread,
-      likesCount: thread._count?.likes || 0, 
-      isLikedByUser: thread.isLikedByUser || false, 
+      likesCount: thread._count?.likes || 0, // Jumlah like
+      isLikedByUser: thread.isLikedByUser || false, // Status liked oleh user
     }));
   },
 });
@@ -232,16 +232,15 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
 
           <HStack mt={4} gap={8}>
             <HStack gap={1}>
-            <Button
-  variant="plain"
-  color={likes[thread.id] === 1 ? 'red' : 'white'}
-  size="sm"
-  onClick={() => toggleLike(thread.id)}
->
-  <FaHeart />
-  {likes[thread.id] ?? thread._count?.likes ?? 0}
-</Button>
-
+              <Button
+                variant="plain"
+                color={likes[thread.id] > 0 ? 'red' : 'white'}
+                size="sm"
+                onClick={() => toggleLike(thread.id)}
+              >
+                <FaHeart />
+                {likes[thread.id] ?? thread._count?.likes ?? 0}
+              </Button>
               <Link to={`/post/${thread.id}`}>
                 <Button variant="plain" color={'white'} size="sm">
                   <FaComment />
