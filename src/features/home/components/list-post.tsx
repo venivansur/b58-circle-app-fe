@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import {
   Box,
   Text,
@@ -32,7 +32,7 @@ import { GalleryAdd } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 export function ListPost() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { likes, toggleLike } = useLikeStore();
+  const { likes, toggleLike, loadLikes } = useLikeStore();
   const queryClient = useQueryClient();
   const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [editedContent, setEditedContent] = useState('');
@@ -49,7 +49,9 @@ export function ListPost() {
   } = useDisclosure();
   const { user } = useAuthStore();
   const userId = user?.id;
-
+  useEffect(() => {
+    loadLikes();  // Pastikan data like sudah dimuat
+  }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
