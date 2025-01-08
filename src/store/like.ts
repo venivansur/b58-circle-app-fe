@@ -8,15 +8,26 @@ interface LikeStore {
 }
 
 export const useLikeStore = create<LikeStore>((set, get) => {
+  const getInitialLikes = () => {
+    if (typeof window === 'undefined') return {}; // Hindari akses di server
+    try {
+      return JSON.parse(localStorage.getItem('likes') || '{}');
+    } catch {
+      console.error('Invalid localStorage data');
+      return {};
+    }
+  };
+
   return {
-    likes: JSON.parse(localStorage.getItem('likes') || '{}'),
+    likes: getInitialLikes(),
 
     loadLikes: async () => {
       try {
         const response = await api.get('/threads/likes');
         const backendLikes = response.data.likes || {};
 
-        const savedLikes = JSON.parse(localStorage.getItem('likes') || '{}');
+        // Kombinasikan data backend dan localStorage
+        const savedLikes = getInitialLikes();
         const combinedLikes = { ...backendLikes, ...savedLikes };
 
         localStorage.setItem('likes', JSON.stringify(combinedLikes));
@@ -29,16 +40,18 @@ export const useLikeStore = create<LikeStore>((set, get) => {
     toggleLike: async (threadId) => {
       try {
         const currentLikeStatus = get().likes[threadId] || 0;
+
         const response = await api.post(`/threads/${threadId}/like`, {
           likeStatus: currentLikeStatus === 0 ? 1 : 0,
         });
 
-        const updatedLikeStatus = response.data.thread?._count.likes;
+        const updatedLikeStatus = response.data.thread?._count?.likes;
 
         if (updatedLikeStatus === undefined) {
           throw new Error('Tidak ada data status like dalam respons');
         }
 
+        // Perbarui state dan localStorage
         set((state) => {
           const updatedLikes = {
             ...state.likes,
