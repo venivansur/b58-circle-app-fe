@@ -243,7 +243,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
   onClick={() => toggleLike(thread.id)}
 >
   <FaHeart />
-  {likes[thread.id] }
+  {likes[thread.id] ?? thread._count?.likes ?? 0}  
 </Button>
 
               <Link to={`/post/${thread.id}`}>
