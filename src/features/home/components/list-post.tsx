@@ -55,6 +55,8 @@ export function ListPost() {
     loadLikes();
   }, [loadLikes]);
 
+  
+
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
@@ -238,7 +240,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
             <HStack gap={1}>
             <Button
   variant="plain"
-  color={thread.isLikedByUser ? 'red' : 'white'}
+  bg={thread.isLikedByUser ? 'red' : 'white'}
   size="sm"
   onClick={() => toggleLike(thread.id)}
 >
