@@ -186,7 +186,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
       </Box>
     );
   }
- 
+
   return (
     <Box>
       {threads.map((thread) => (
@@ -238,12 +238,12 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
             <HStack gap={1}>
             <Button
   variant="plain"
-  color={likes[thread.id] > 0 ? 'red' : 'white'}  // Jika sudah dilike, warna merah
+  color={likes[thread.id] > 0 ? 'red' : 'white'}
   size="sm"
   onClick={() => toggleLike(thread.id)}
 >
   <FaHeart />
-  {likes[thread.id] ?? thread._count?.likes ?? 0}  // Menampilkan jumlah likes
+  {likes[thread.id] }
 </Button>
 
               <Link to={`/post/${thread.id}`}>
