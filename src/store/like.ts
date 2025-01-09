@@ -22,15 +22,17 @@ export const useLikeStore = create<LikeStore>((set, get) => {
     likes: getInitialLikes(),
 
   // Menambahkan loadLikes untuk memastikan data backend dan localStorage tergabung dengan benar
+// Memperbarui `loadLikes` untuk memuat data like dari backend
 loadLikes: async () => {
   try {
     const response = await api.get('/threads/likes');
-    const backendLikes = response.data.likes || {};
+    const backendLikes = response.data.likes || {}; // Ambil likes dari backend
 
+    // Gabungkan likes dari backend dan localStorage
     const savedLikes = getInitialLikes();
     const combinedLikes = { ...backendLikes, ...savedLikes };
 
-    // Simpan data gabungan di localStorage dan state
+    // Simpan data gabungan ke localStorage
     localStorage.setItem('likes', JSON.stringify(combinedLikes));
     set({ likes: combinedLikes });
   } catch (error) {
@@ -38,11 +40,11 @@ loadLikes: async () => {
   }
 },
 
-// Memperbarui toggleLike untuk mempertahankan status like yang sudah ada dari pengguna lain
+// Memperbarui toggleLike agar tidak menghapus like pengguna lain
 toggleLike: async (threadId) => {
   try {
-    const currentLikeStatus = get().likes[threadId] || 0;
-    const newLikeStatus = currentLikeStatus === 0 ? 1 : 0;
+    const currentLikeStatus = get().likes[threadId] || 0; // Ambil status like yang ada
+    const newLikeStatus = currentLikeStatus === 0 ? 1 : 0; // Toggle like
 
     const response = await api.post(`/threads/${threadId}/like`, {
       likeStatus: newLikeStatus,
@@ -54,11 +56,11 @@ toggleLike: async (threadId) => {
       throw new Error('Tidak ada data status like dalam respons');
     }
 
-    // Gabungkan data likes dari backend dan localStorage
+    // Update likes secara global
     set((state) => {
       const updatedLikes = {
         ...state.likes,
-        [threadId]: newLikeStatus,  // Perbarui like status sesuai dengan like baru
+        [threadId]: newLikeStatus, // Update status like thread tertentu
       };
 
       // Perbarui localStorage dengan data terbaru
@@ -69,6 +71,7 @@ toggleLike: async (threadId) => {
     console.error('Error toggling like:', error);
   }
 }
+
 
     
   };
