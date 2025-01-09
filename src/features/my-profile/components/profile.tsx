@@ -137,7 +137,7 @@ export function Profile() {
                   <HStack gap={1}>
                     <Button
                       variant="plain"
-                      color={thread.isLikedByUser ? 'red' : 'white'}
+                      color={likes[thread.id] ? 'red' : 'white'}
                       size="sm"
                       onClick={() => handleLike(thread.id)}
                     >
