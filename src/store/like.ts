@@ -4,25 +4,12 @@ import { api } from '@/libs/api';
 interface LikeStore {
   likes: Record<number, number>;
   toggleLike: (threadId: number) => Promise<void>;
-  loadLikes: () => Promise<void>;
 }
 
 export const useLikeStore = create<LikeStore>((set, get) => {
   return {
     likes: {}, 
 
-    loadLikes: async () => {
-      try {
-        const response = await api.get('/threads/likes');
-        const backendLikes = response.data.likes || {}; 
-
-        set({ likes: backendLikes });
-      } catch (error) {
-        console.error('Error loading likes:', error);
-      }
-    },
-
-    
     toggleLike: async (threadId) => {
       try {
         const currentLikeStatus = get().likes[threadId] || 0;
@@ -55,6 +42,5 @@ export const useLikeStore = create<LikeStore>((set, get) => {
         console.error('Error toggling like:', error);
       }
     }
-    
   };
 });

@@ -1,4 +1,4 @@
-import { useState, useRef,useEffect } from 'react';
+import { useState, useRef} from 'react';
 import {
   Box,
   Text,
@@ -33,7 +33,7 @@ import { GreenButton } from '@/components/ui/green-button';
 export function ListPost() {
   
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { likes, toggleLike, loadLikes } = useLikeStore((state) => state);
+  const { likes, toggleLike } = useLikeStore((state) => state);
   const queryClient = useQueryClient();
   const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [editedContent, setEditedContent] = useState('');
@@ -50,10 +50,7 @@ export function ListPost() {
   } = useDisclosure();
   const { user } = useAuthStore();
   const userId = user?.id;
-  useEffect(() => {
-  
-    loadLikes();
-  }, [loadLikes]);
+
 
   
 
