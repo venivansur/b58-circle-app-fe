@@ -31,8 +31,9 @@ import {
 import { GalleryAdd } from '@/assets/index';
 import { GreenButton } from '@/components/ui/green-button';
 export function ListPost() {
+  
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { likes, toggleLike, loadLikes } = useLikeStore();
+  const { likes, toggleLike, loadLikes } = useLikeStore((state) => state);
   const queryClient = useQueryClient();
   const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [editedContent, setEditedContent] = useState('');
@@ -50,8 +51,10 @@ export function ListPost() {
   const { user } = useAuthStore();
   const userId = user?.id;
   useEffect(() => {
-    loadLikes();  // Pastikan data like sudah dimuat
-  }, []);
+  
+    loadLikes();
+  }, [loadLikes]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
@@ -183,7 +186,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
       </Box>
     );
   }
-
+ 
   return (
     <Box>
       {threads.map((thread) => (
@@ -235,12 +238,12 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
             <HStack gap={1}>
             <Button
   variant="plain"
-  color={likes[thread.id] === 1 ? 'red' : 'white'}
+  color={likes[thread.id] > 0 ? 'red' : 'white'}  // Jika sudah dilike, warna merah
   size="sm"
   onClick={() => toggleLike(thread.id)}
 >
   <FaHeart />
-  {likes[thread.id] ?? thread._count?.likes ?? 0}
+  {likes[thread.id] ?? thread._count?.likes ?? 0}  // Menampilkan jumlah likes
 </Button>
 
               <Link to={`/post/${thread.id}`}>
