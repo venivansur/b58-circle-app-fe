@@ -180,15 +180,9 @@ export default function PostWithoutImageDetail() {
           <HStack gap={1}>
             <Button
               variant="plain"
-              color={likes[thread.id] > 0 ? 'red' : 'white'}
+              color={thread.isLikedByUser ? 'red' : 'white'}
               size="sm"
-              onClick={() => {
-                if (loggedInUser) {
-                  toggleLike(thread.id);
-                } else {
-                  alert('You need to log in to like posts.');
-                }
-              }}
+              onClick={() => toggleLike(thread.id)}
             >
               <FaHeart />
               {likes[thread.id] || 0}

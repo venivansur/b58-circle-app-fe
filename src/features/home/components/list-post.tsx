@@ -240,7 +240,7 @@ const { data: threads, isLoading, isError, error } = useQuery<Thread[]>({
             <HStack gap={1}>
             <Button
   variant="plain"
-  color={thread.id ? 'red' : 'white'}
+  color={thread.isLikedByUser ? 'red' : 'white'}
   size="sm"
   onClick={() => toggleLike(thread.id)}
 >
