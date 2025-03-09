@@ -15,7 +15,7 @@ export function Credit() {
       <Flex align="center" mb={2}>
         <Text>Developed by</Text>
         <Text fontWeight="bold" ml={1}>
-        Veni Vansurya
+        Kotrel Manurung
         </Text>
         <Text mx={2}>•</Text>
         
